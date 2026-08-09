@@ -77,16 +77,56 @@ two findings is how a mechanism like this loses its credibility on first use.
 
 ## Publishing
 
-1. `python3 build/sync_console.py` — pull in the console page from its locked commit
-2. `python3 build/site_cid.py --json` — get the tree hash and CID
-3. Write a pin record in the console repo (`pins/<cid>.json`) carrying this repo's
-   commit, the tree hash, the CID and the parameters
-4. **Two** registered nodes each rebuild and sign a confirmation
-   (`reference/sign_confirmation.py`)
-5. `reference/verify_pin.py` must be **GREEN** — not AMBER
-6. Pin the bytes, then set the contenthash
+```bash
+# 1 · pull in the console page from its locked commit, and commit the result
+python3 build/sync_console.py
+git commit -am "console: <what changed>"
 
-Step 5 is the gate. AMBER means something could not be checked, and
-could-not-check is never a pass.
+# 2 · derive the values that go in the pin record
+python3 build/site_cid.py --json
+```
+
+3 · Write `pins/<cid>.json` in the console repo with `artifact_kind: "site-tree"`,
+this repo's commit, the tree hash, the CID and `cid_params`.
+
+4 · **Two** registered nodes each rebuild and sign:
+
+```bash
+export CRC_KEY=0x…
+python3 reference/sign_confirmation.py --record pins/<cid>.json --node <yournode>
+```
+
+5 · The gate:
+
+```bash
+python3 reference/verify_pin.py pins/<cid>.json     # must print GREEN
+```
+
+**AMBER is not permission to proceed.** It means something could not be
+established, and could-not-check is never a pass.
+
+6 · Add the bytes **on a node you control**, with the recorded parameters — the
+same ones `site.pin.json` names, so the CID is the one that was confirmed:
+
+```bash
+ipfs add -Q -r --cid-version=1 --chunker=size-262144 --hash=sha2-256 \
+  --ignore .git --ignore .github --ignore build --ignore __pycache__ \
+  --ignore console.lock --ignore site.pin.json --ignore README.md --ignore .gitignore .
+```
+
+That must print **exactly** the CID in the pin record. If it does not, stop: you
+are about to pin something nobody confirmed.
+
+7 · For durability, ask a pinning service to **pin that CID** (Pinata's
+"pin by CID" / `pinByHash`). Do **not** re-upload the folder to the service.
+A service that re-adds the files applies *its own* chunker, cid-version and
+wrapping, and hands back a **different CID** — which is the parameter trap
+arriving at the last possible moment, after every confirmation has been signed
+against the other value. Replicating a CID cannot change it; re-uploading can.
+
+8 · Set the contenthash to that CID.
+
+Steps 6–8 are the only ones that are not reproducible by a third party, which is
+exactly why 3–5 exist.
 
 [pin]: https://github.com/trustless-ai/cross-reference-console/blob/main/PIN-RECORD.md
