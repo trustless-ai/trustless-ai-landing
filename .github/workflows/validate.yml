@@ -1,0 +1,39 @@
+name: validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+
+      - name: console page is the build of the locked commit (never hand-copied)
+        run: |
+          # The published console used to match no commit anyone could name,
+          # which meant nobody could rebuild it and so nobody could verify the
+          # CID. This is the check that keeps that from recurring.
+          python3 build/sync_console.py --check
+
+      - name: site CID is derivable and its parameters are recorded
+        run: |
+          # Not asserting a particular CID — that changes with every content
+          # update. Asserting that the tree hash and parameters can be derived
+          # at all, since a pin record cannot be written without them.
+          python3 build/site_cid.py
+
+      - name: the CID computation is deterministic
+        run: |
+          A=$(python3 build/site_cid.py --json)
+          B=$(python3 build/site_cid.py --json)
+          if [ "$A" != "$B" ]; then
+            echo "site CID computation is not deterministic — two runs differ."
+            echo "No second party could confirm a CID derived this way."
+            diff <(echo "$A") <(echo "$B") || true
+            exit 1
+          fi
+          echo "ok — two runs agree"

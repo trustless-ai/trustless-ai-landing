@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>trustless-ai — Don't trust. Recompute.</title>
+<meta name="description" content="Decentralized AI infrastructure anyone can provide, anyone can use, and everyone can verify by recomputing the proof — owned by no one." />
+<meta property="og:title" content="trustless-ai — Don't trust. Recompute." />
+<meta property="og:description" content="Open standards, reference implementations and tooling for AI agents you never have to trust — only recompute." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="./assets/logo.png" />
+<link rel="icon" href="./assets/favicon.ico" sizes="any" />
+<link rel="icon" type="image/png" href="./assets/favicon-32.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+<noscript><style>.cards .card{opacity:1 !important;transform:none !important;}</style></noscript>
+<style>
+  @font-face{
+    font-family:'Space Grotesk';
+    src:url('./fonts/SpaceGrotesk.woff2') format('woff2');
+    font-weight:300 700; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'InterVar';
+    src:url('./fonts/Inter.woff2') format('woff2');
+    font-weight:100 900; font-style:normal; font-display:swap;
+  }
+
+  :root{
+    --bg:#F5F5F5;
+    --ink:#0b0b0f;
+    --dark:#2B2644;
+    --darker:#1b1830;
+    --violet:#6D5AE6;
+    --peri:#A9A0F5;
+    --soft:#E6EEFB;
+    --maxw:88rem;
+    --font-display:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+    --font-body:'InterVar','Inter',ui-sans-serif,system-ui,sans-serif;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{font-family:var(--font-display);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  img,svg,video{display:block;}
+  .wrap{max-width:var(--maxw);margin:0 auto;}
+
+  /* ---------- Navbar ---------- */
+  nav{position:absolute;top:0;left:0;right:0;z-index:20;padding:20px 24px;}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand img{height:34px;width:auto;image-rendering:-webkit-optimize-contrast;}
+  .brand span{font-size:1.5rem;font-weight:600;letter-spacing:-.03em;}
+  .nav-links{display:flex;gap:32px;}
+  .nav-links a{font-size:1rem;color:#4b4b57;font-weight:500;transition:color .2s;}
+  .nav-links a:hover{color:var(--ink);}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;font-size:1rem;font-weight:500;
+    padding:10px 26px;border-radius:999px;transition:background .2s,transform .2s;border:none;cursor:pointer;font-family:var(--font-display);}
+  .pill:hover{background:#26262e;transform:translateY(-1px);}
+  .pill svg{width:16px;height:16px;}
+
+  /* ---------- Hero ---------- */
+  .fold{min-height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+  .hero{flex:1;padding:80px 24px 24px;display:flex;align-items:flex-end;}
+  .hero-card{position:relative;width:100%;border-radius:22px;overflow:hidden;
+    height:calc(100vh - 104px);min-height:560px;background:var(--soft);}
+  .hero-bg{position:absolute;inset:0;overflow:hidden;}
+  .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.85;mix-blend-mode:multiply;}
+  .b1{width:52%;height:70%;left:-8%;top:-18%;background:radial-gradient(circle at 30% 30%,#cfe0ff,#aec7ff 55%,transparent 72%);animation:float1 18s ease-in-out infinite;}
+  .b2{width:48%;height:60%;right:-6%;top:8%;background:radial-gradient(circle at 60% 40%,#dbecff,#b4cdff 60%,transparent 75%);animation:float2 22s ease-in-out infinite;}
+  .b3{width:46%;height:64%;left:20%;bottom:-24%;background:radial-gradient(circle at 50% 50%,#d2ecff,#aecdf5 58%,transparent 74%);animation:float3 26s ease-in-out infinite;}
+  .mesh{position:absolute;inset:0;opacity:.16;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(6%,4%) scale(1.08);}}
+  @keyframes float2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-5%,6%) scale(1.1);}}
+  @keyframes float3{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(4%,-5%) scale(1.06);}}
+  .hero-mascot{position:absolute;z-index:5;right:7%;top:50%;height:64%;max-height:540px;
+    pointer-events:none;animation:bob 6s ease-in-out infinite;}
+  .hero-mascot img{height:100%;width:auto;filter:drop-shadow(0 24px 46px rgba(43,38,68,.22));
+    image-rendering:-webkit-optimize-contrast;transition:transform .45s cubic-bezier(.22,1,.36,1);will-change:transform;}
+  @keyframes bob{0%,100%{transform:translateY(-52%);}50%{transform:translateY(-45%);}}
+  @media (max-width:1024px){.hero-mascot{display:none;}}
+
+  .hero-content{position:relative;z-index:10;display:flex;flex-direction:column;align-items:flex-start;height:100%;
+    padding:48px;padding-top:clamp(96px,14vh,150px);}
+  .hero h1{font-size:clamp(2.6rem,6vw,4rem);font-weight:500;line-height:1.02;letter-spacing:-.04em;max-width:40rem;margin-bottom:18px;}
+  .hero p.sub{font-family:var(--font-body);color:rgba(11,11,15,.72);font-size:clamp(1rem,1.3vw,1.15rem);
+    max-width:30rem;margin-bottom:32px;line-height:1.6;}
+  .cta{display:inline-flex;align-items:center;gap:12px;background:var(--ink);color:#fff;font-weight:500;
+    font-size:1.05rem;padding:8px 8px 8px 30px;border-radius:999px;transition:background .2s,transform .2s;}
+  .cta:hover{background:#26262e;transform:translateY(-1px);}
+  .cta .arrow{background:#fff;border-radius:50%;padding:9px;display:flex;}
+  .cta .arrow svg{width:18px;height:18px;color:var(--ink);}
+
+  /* entrance: hero headline + copy slide in from the left */
+  @keyframes slideInLeft{from{opacity:0;transform:translateX(-46px);}to{opacity:1;transform:translateX(0);}}
+  .hero h1{animation:slideInLeft .85s cubic-bezier(.22,1,.36,1) both;}
+  .hero p.sub{animation:slideInLeft .85s cubic-bezier(.22,1,.36,1) .12s both;}
+  .hero-content .cta{animation:slideInLeft .85s cubic-bezier(.22,1,.36,1) .24s both;}
+
+  /* ---------- Marquee (hero) ---------- */
+  .marquee{margin-top:auto;padding-top:40px;width:100%;max-width:30rem;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);}
+  .marquee-track{display:flex;width:max-content;animation:marquee 24s linear infinite;}
+  @keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  .marquee .it{margin:0 28px;flex-shrink:0;color:rgba(11,11,15,.6);white-space:nowrap;}
+
+  /* ---------- Info section ---------- */
+  section.block{background:var(--bg);padding:96px 24px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;}
+  .info-head h2{font-size:clamp(2rem,4vw,3rem);font-weight:500;line-height:1.05;letter-spacing:-.03em;margin-bottom:28px;}
+  .info-lead{font-size:clamp(1.4rem,2.4vw,1.9rem);line-height:1.4;color:rgba(11,11,15,.72);letter-spacing:-.01em;}
+  .cta.small{font-size:.98rem;padding:6px 6px 6px 24px;}
+  .cta.small .arrow{padding:7px;}
+  .cta.small .arrow svg{width:16px;height:16px;}
+
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:56px;}
+  .card{border-radius:20px;padding:28px;min-height:20rem;display:flex;flex-direction:column;justify-content:space-between;}
+  .card.wide{grid-column:span 2;position:relative;overflow:hidden;color:var(--ink);}
+  .card.wide .cbg{position:absolute;inset:0;background:linear-gradient(135deg,#eaf1ff,#cfe0ff 55%,#bcd6ff);z-index:0;}
+  .card.wide .cmesh{position:absolute;inset:0;z-index:1;opacity:.5;}
+  .card.wide .ctop,.card.wide .cbot{position:relative;z-index:2;}
+  .card.dark{background:var(--dark);color:#fff;}
+  .card h3{font-size:1.5rem;font-weight:600;line-height:1.15;letter-spacing:-.02em;white-space:pre-line;}
+  .card .body{font-size:1rem;line-height:1.5;max-width:22rem;}
+  .card.wide .body{color:rgba(11,11,15,.72);}
+  .card.dark .body{color:rgba(255,255,255,.62);}
+  /* entrance: wide card slides from left, dark cards from right (on scroll) */
+  .cards .card{opacity:0;transition:opacity .7s ease, transform .8s cubic-bezier(.22,1,.36,1);}
+  .cards .card.wide{transform:translateX(-52px);}
+  .cards .card.dark{transform:translateX(52px);}
+  .cards.in .card{opacity:1;transform:translateX(0);}
+  .cards.in .card.dark:last-child{transition-delay:.12s;}
+  @media (prefers-reduced-motion:reduce){
+    .hero h1,.hero p.sub,.hero-content .cta,.hero-mascot{animation:none;}
+    .cards .card{opacity:1;transform:none;transition:none;}
+  }
+  .card-link{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-size:.92rem;font-weight:600;
+    color:#c9c2ff;transition:gap .2s,color .2s;}
+  .card-link:hover{gap:10px;color:#fff;}
+
+  /* ---------- Backers ---------- */
+  section.backers{background:var(--bg);padding:8px 24px 40px;}
+  .backers-grid{display:grid;grid-template-columns:1fr 3fr;gap:32px;align-items:center;}
+  .backers-grid .lbl{color:rgba(11,11,15,.7);font-size:1rem;line-height:1.5;white-space:pre-line;}
+  .backers-track{display:flex;width:max-content;animation:bmarquee 34s linear infinite;}
+  @keyframes bmarquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  .backers .it{margin:0 40px;flex-shrink:0;color:rgba(11,11,15,.5);white-space:nowrap;}
+  .backers .ov{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);}
+
+  /* ---------- Use cases ---------- */
+  .uc-left{padding-right:48px;padding-top:8px;}
+  .eyebrow{color:rgba(11,11,15,.6);font-size:.9rem;margin-bottom:10px;letter-spacing:.02em;}
+  .uc-left h2{font-size:clamp(3rem,6vw,4rem);font-weight:500;line-height:1;letter-spacing:-.04em;margin-bottom:24px;}
+  .uc-left p{color:rgba(11,11,15,.6);font-size:1rem;line-height:1.6;max-width:24rem;}
+  .stack-list{list-style:none;margin:22px 0 0;max-width:26rem;}
+  .stack-list li{padding:12px 0;border-top:1px solid rgba(11,11,15,.1);color:rgba(11,11,15,.7);font-size:.98rem;line-height:1.5;}
+  .stack-list li b{font-family:var(--font-display);font-weight:600;color:var(--ink);}
+  .uc-panel{position:relative;border-radius:26px;overflow:hidden;min-height:45rem;background:var(--dark);}
+  .uc-panel .pbg{position:absolute;inset:0;background:radial-gradient(120% 90% at 20% 15%,#3a3560,#241f3d 55%,#171428);}
+  .uc-panel .pmesh{position:absolute;inset:0;opacity:.5;}
+  .uc-content{position:relative;z-index:10;padding:48px;}
+  .uc-content h3{color:#fff;font-size:clamp(2rem,4vw,3rem);font-weight:500;line-height:1.05;letter-spacing:-.03em;margin-bottom:20px;}
+  .uc-content p{color:rgba(255,255,255,.72);font-size:1rem;line-height:1.6;max-width:28rem;margin-bottom:32px;}
+  .know{display:inline-flex;align-items:center;gap:12px;color:#fff;font-weight:500;font-size:1rem;}
+  .know .circ{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;transition:background .2s,transform .2s;}
+  .know:hover .circ{background:#fff;transform:translateX(3px);}
+  .know .circ svg{width:16px;height:16px;color:var(--ink);}
+
+  /* ---------- Playable ---------- */
+  section.play{background:var(--bg);padding:32px 24px 96px;}
+  .play-head{max-width:38rem;margin-bottom:30px;}
+  .play-head .eyebrow{margin-bottom:10px;}
+  .play-head h2{font-size:clamp(2rem,4vw,3rem);font-weight:500;letter-spacing:-.03em;line-height:1.05;margin-bottom:14px;}
+  .play-head p{color:rgba(11,11,15,.6);font-size:1rem;line-height:1.6;}
+  .play-frame{position:relative;width:100%;aspect-ratio:16/9;border-radius:22px;overflow:hidden;
+    background:#07090d;box-shadow:0 30px 64px rgba(43,38,68,.20);}
+  .play-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;}
+  .play-poster{position:absolute;inset:0;cursor:pointer;border:0;padding:0;width:100%;height:100%;
+    background-size:cover;background-position:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+  .play-poster::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,9,13,.30),rgba(7,9,13,.60));}
+  .play-btn{position:relative;display:inline-flex;align-items:center;gap:12px;background:#fff;color:var(--ink);
+    font-family:var(--font-display);font-weight:600;font-size:1.05rem;padding:13px 28px 13px 24px;border-radius:999px;transition:transform .2s;}
+  .play-poster:hover .play-btn{transform:translateY(-2px);}
+  .play-btn .tri{width:0;height:0;border-left:14px solid var(--ink);border-top:9px solid transparent;border-bottom:9px solid transparent;}
+  .play-hint{position:relative;color:rgba(255,255,255,.82);font-family:var(--font-body);font-size:.88rem;letter-spacing:.02em;}
+
+  /* ---------- News / Press ---------- */
+  section.news{background:var(--bg);padding:8px 24px 96px;}
+  .news-head{max-width:38rem;margin-bottom:30px;}
+  .news-head .eyebrow{margin-bottom:10px;}
+  .news-head h2{font-size:clamp(2rem,4vw,3rem);font-weight:500;letter-spacing:-.03em;line-height:1.05;margin-bottom:14px;}
+  .news-head p{color:rgba(11,11,15,.6);font-size:1rem;line-height:1.6;}
+  .news-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  .ncard{display:flex;flex-direction:column;background:#fff;border:1px solid rgba(11,11,15,.08);border-radius:18px;
+    overflow:hidden;text-decoration:none;color:var(--ink);transition:transform .2s,box-shadow .2s;}
+  .ncard:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(43,38,68,.12);}
+  .ncard .thumb{aspect-ratio:16/9;background:linear-gradient(135deg,#efeaff,#d9ccff 60%,#c7d6ff);
+    background-size:cover;background-position:center;background-repeat:no-repeat;}
+  .ncard .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1;}
+  .ncard .meta{font-family:var(--font-body);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:var(--violet);}
+  .ncard h3{font-family:var(--font-display);font-size:1.02rem;font-weight:600;line-height:1.28;letter-spacing:-.01em;}
+  .ncard .blurb{font-family:var(--font-body);font-size:.88rem;color:rgba(11,11,15,.6);line-height:1.45;}
+  .ncard .more{margin-top:auto;font-size:.82rem;font-weight:600;color:var(--violet);}
+  .news-empty{color:rgba(11,11,15,.45);font-size:.95rem;}
+  @media (max-width:1024px){.news-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:600px){.news-grid{grid-template-columns:1fr;}}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--bg);padding:48px 24px 64px;border-top:1px solid rgba(11,11,15,.08);}
+  .foot-row{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .foot-links{display:flex;gap:28px;flex-wrap:wrap;}
+  .foot-links a{color:rgba(11,11,15,.6);font-size:.95rem;transition:color .2s;}
+  .foot-links a:hover{color:var(--ink);}
+  .foot-note{color:rgba(11,11,15,.45);font-size:.85rem;font-family:var(--font-body);}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:900px){
+    .nav-links{display:none;}
+    .grid2,.cards,.backers-grid{grid-template-columns:1fr;}
+    .card.wide{grid-column:span 1;}
+    .uc-left{padding-right:0;}
+    .hero-content{padding:32px;}
+    .uc-panel{min-height:32rem;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== FOLD: nav + hero ===== -->
+<div class="fold">
+  <nav>
+    <div class="wrap nav-row">
+      <a class="brand" href="#">
+        <img src="./assets/logo.png" alt="trustless-ai mascot" />
+        <span>trustless-ai</span>
+      </a>
+      <div class="nav-links">
+        <a href="#standards">Standards</a>
+        <a href="#recompute">Recompute</a>
+        <a href="#ecosystem">Ecosystem</a>
+        <a href="#practice">Stack</a>
+        <a href="#playable">Play</a>
+        <a href="./console/index.html">Console</a>
+        <a href="./press/index.html">About</a>
+        <a href="https://github.com/trustless-ai">GitHub</a>
+      </div>
+      <a class="pill" href="https://github.com/trustless-ai">
+        GitHub
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="wrap" style="width:100%;">
+      <div class="hero-card">
+        <div class="hero-bg">
+          <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+          <svg class="mesh" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <g stroke="#0b0b0f" stroke-width="1" fill="none" opacity="0.6">
+              <path d="M120 620 L360 360 L620 470 L860 220 L1080 380"/>
+              <path d="M120 620 L340 700 L620 470 L900 640 L1080 380"/>
+              <path d="M360 360 L340 700"/><path d="M620 470 L860 220"/><path d="M860 220 L900 640"/>
+            </g>
+            <g fill="#0b0b0f">
+              <circle cx="120" cy="620" r="5"/><circle cx="360" cy="360" r="5"/><circle cx="620" cy="470" r="6"/>
+              <circle cx="860" cy="220" r="5"/><circle cx="1080" cy="380" r="5"/><circle cx="340" cy="700" r="5"/><circle cx="900" cy="640" r="5"/>
+            </g>
+          </svg>
+        </div>
+        <div class="hero-mascot" aria-hidden="true"><img src="./assets/hero-mascot.webp" alt="" /></div>
+        <div class="hero-content">
+          <h1>Don't trust.<br/>Recompute.</h1>
+          <p class="sub">Decentralized AI infrastructure anyone can provide, anyone can use, and everyone can verify — by recomputing the proof. Owned by no one.</p>
+          <a class="cta" href="https://github.com/trustless-ai">
+            Explore the standards
+            <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+          </a>
+          <div class="marquee">
+            <div class="marquee-track" id="heroTrack"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Info ===== -->
+<section class="block" id="standards">
+  <div class="wrap">
+    <div class="grid2" style="margin-bottom:16px;">
+      <div class="info-head">
+        <h2>Meet trustless-ai.</h2>
+        <a class="cta small" href="https://github.com/trustless-ai">
+          Discover it
+          <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+        </a>
+      </div>
+      <p class="info-lead">An open ecosystem of standards, reference implementations and tooling for AI agents you never have to trust — only recompute.</p>
+    </div>
+
+    <div class="cards" id="recompute">
+      <div class="card wide">
+        <div class="cbg"></div>
+        <svg class="cmesh" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <g stroke="#0b0b0f" stroke-width="1" fill="none" opacity="0.35">
+            <path d="M60 320 L200 180 L330 250 L450 120 L560 220"/><path d="M200 180 L220 360"/><path d="M330 250 L450 120"/>
+          </g>
+          <g fill="#0b0b0f" opacity="0.55"><circle cx="60" cy="320" r="4"/><circle cx="200" cy="180" r="4"/><circle cx="330" cy="250" r="5"/><circle cx="450" cy="120" r="4"/><circle cx="560" cy="220" r="4"/><circle cx="220" cy="360" r="4"/></g>
+        </svg>
+        <div class="ctop"><h3>Recompute,<br/>don't trust.</h3></div>
+        <div class="cbot"><p class="body">Every claim re-derived from the primary artifact, pinned to an exact reference, with the evidence attached. No summary taken on faith.</p></div>
+      </div>
+      <div class="card dark">
+        <h3>Owned by<br/>no one.</h3>
+        <p class="body">Open standards and CC0 reference implementations — anyone can provide, anyone can use, no gatekeeper in the loop.</p>
+      </div>
+      <div class="card dark">
+        <h3>Verify<br/>every proof.</h3>
+        <div>
+          <p class="body">A tri-state verdict — verified-good, verified-bad, or unverifiable. "Couldn't check" is its own answer, never a silent pass.</p>
+          <a class="card-link" href="https://gateway.ensub.org/agent/consult/job/0xbc01b40fe7a3509f35470053d4bc1844d50c9782546cf0fc11154adcb90caa56/proof" target="_blank" rel="noopener">Verify a real proof →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Ecosystem marquee ===== -->
+<section class="backers" id="ecosystem">
+  <div class="wrap">
+    <div class="backers-grid">
+      <div class="lbl">Standards, tooling and reference impls —
+built in the open by independent contributors.</div>
+      <div class="ov">
+        <div class="backers-track" id="backTrack"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Use cases ===== -->
+<section class="block" id="practice">
+  <div class="wrap">
+    <div class="grid2">
+      <div class="uc-left">
+        <div class="eyebrow">trustless-ai in practice</div>
+        <h2>The stack</h2>
+        <p>Three layers for agents you never have to trust — and you recompute at every one, from proof to deploy:</p>
+        <ul class="stack-list">
+          <li><b>recompute-kit</b> — verify. Re-derive any claim from its primary artifact, tri-state.</li>
+          <li><b>agent bindings</b> — the ERCs encoding identity, provenance, verification and settlement.</li>
+          <li><b>onchain-boiler-kit</b> — ship. Deploy the whole stack, no code required.</li>
+        </ul>
+      </div>
+      <div class="uc-panel">
+        <div class="pbg"></div>
+        <svg class="pmesh" viewBox="0 0 700 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <g stroke="#ffffff" stroke-width="1" fill="none" opacity="0.28">
+            <path d="M90 760 L260 560 L430 660 L560 420 L640 600"/>
+            <path d="M90 760 L300 840 L430 660 L610 800"/>
+            <path d="M260 560 L300 840"/><path d="M430 660 L560 420"/><path d="M560 420 L200 300"/>
+          </g>
+          <g fill="#ffffff" opacity="0.55">
+            <circle cx="90" cy="760" r="5"/><circle cx="260" cy="560" r="5"/><circle cx="430" cy="660" r="6"/><circle cx="560" cy="420" r="5"/><circle cx="640" cy="600" r="5"/><circle cx="300" cy="840" r="5"/><circle cx="610" cy="800" r="5"/><circle cx="200" cy="300" r="5"/>
+          </g>
+        </svg>
+        <div class="uc-content">
+          <h3>The recompute mesh</h3>
+          <p>Independent nodes re-run every proof node-side, not self-attested — the always-on audit runtime for the agent-standards family. Verify by recomputing, never by trusting.</p>
+          <a class="know" href="https://github.com/trustless-ai/recompute-kit">
+            <span class="circ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+            Know more
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Playable ===== -->
+<section class="play" id="playable">
+  <div class="wrap">
+    <div class="play-head">
+      <div class="eyebrow">Meet the mascot</div>
+      <h2>Take the agent for a spin</h2>
+      <p>The trustless-ai mascot, yours to move. Let him run around — arrow keys or A/D to walk, Shift to run, Space to jump.</p>
+    </div>
+    <div class="play-frame" id="playFrame">
+      <button class="play-poster" id="playPoster" style="background-image:url('./game/poster.jpg')" aria-label="Play the demo">
+        <span class="play-btn"><span class="tri"></span> Play the demo</span>
+        <span class="play-hint">under 1 MB · loads on click</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== News / Press ===== -->
+<section class="news" id="news">
+  <div class="wrap">
+    <div class="news-head">
+      <div class="eyebrow">News &amp; press</div>
+      <h2>What's happening</h2>
+      <p>Milestones and coverage — each card links straight to the artifact, so you can check it, not just read about it.</p>
+    </div>
+    <div class="news-grid" id="newsGrid"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <a class="brand" href="https://github.com/trustless-ai">
+      <img src="./assets/logo.png" alt="trustless-ai mascot" style="height:28px;" />
+      <span style="font-size:1.15rem;">trustless-ai</span>
+    </a>
+    <div class="foot-links">
+      <a href="https://github.com/trustless-ai/recompute-kit">recompute-kit</a>
+      <a href="https://github.com/trustless-ai/agent-ercs">agent-ercs</a>
+      <a href="https://github.com/trustless-ai/onchain-boiler-kit">onchain-boiler-kit</a>
+      <a href="./console/index.html">Cross-Reference Console</a>
+      <a href="./press/index.html">About &amp; Press</a>
+      <a href="https://github.com/trustless-ai">GitHub</a>
+    </div>
+    <div class="foot-note">CC0 — owned by no one.</div>
+  </div>
+</footer>
+
+<script>
+  // Eclectic typographic marquees (mirrors the Halo brand-marquee treatment).
+  var hero = [
+    ["ERC-8004", "font-family:Georgia,serif;font-weight:700;letter-spacing:-.02em;font-size:15px;"],
+    ["ERC-8274", "font-family:Arial,sans-serif;font-weight:900;letter-spacing:.08em;font-size:13px;text-transform:uppercase;"],
+    ["ERC-8275", "font-family:'Trebuchet MS',sans-serif;font-weight:600;letter-spacing:.01em;font-size:15px;font-style:italic;"],
+    ["ERC-8299 · WYRIWE", "font-family:'Courier New',monospace;font-weight:700;letter-spacing:.1em;font-size:13px;text-transform:uppercase;"],
+    ["ERC-8301", "font-family:Palatino,'Book Antiqua',serif;font-weight:400;letter-spacing:-.01em;font-size:16px;"],
+    ["ERC-8312", "font-family:Impact,'Arial Narrow',sans-serif;font-weight:400;letter-spacing:.04em;font-size:14px;"],
+    ["recompute-kit", "font-family:Verdana,sans-serif;font-weight:700;letter-spacing:-.03em;font-size:13px;"]
+  ];
+  var backers = [
+    ["recompute-kit", "font-family:'Times New Roman',serif;font-weight:400;letter-spacing:.02em;font-size:14px;"],
+    ["AGENT-ERCS", "font-family:'Arial Black',Arial,sans-serif;font-weight:900;letter-spacing:.08em;font-size:16px;"],
+    ["ccip-router", "font-family:Impact,sans-serif;font-weight:700;letter-spacing:.05em;font-size:18px;"],
+    ["onchain-boiler-kit", "font-family:Georgia,serif;font-weight:600;letter-spacing:-.02em;font-size:17px;"],
+    ["ConsultEscrow", "font-family:Helvetica,Arial,sans-serif;font-weight:700;letter-spacing:-.01em;font-size:15px;"],
+    ["AccountabilityRecord", "font-family:Verdana,sans-serif;font-weight:700;letter-spacing:.06em;font-size:14px;text-transform:uppercase;"],
+    ["ens-dynamic-kit", "font-family:'Courier New',monospace;font-weight:700;letter-spacing:.14em;font-size:14px;"],
+    ["OCP", "font-family:Palatino,serif;font-weight:500;letter-spacing:.03em;font-size:15px;"]
+  ];
+  function fill(id, arr, cls){
+    var t = document.getElementById(id);
+    var html = "";
+    for (var pass=0; pass<2; pass++){
+      for (var i=0;i<arr.length;i++){
+        html += '<span class="it" style="'+arr[i][1]+'">'+arr[i][0]+'</span>';
+      }
+    }
+    t.innerHTML = html;
+  }
+  fill("heroTrack", hero);
+  fill("backTrack", backers);
+
+  // Click-to-play: only fetch the ~2MB game when the visitor asks for it.
+  var poster = document.getElementById("playPoster");
+  if (poster) poster.addEventListener("click", function(){
+    var frame = document.getElementById("playFrame");
+    var ifr = document.createElement("iframe");
+    ifr.src = "./game/index.html";
+    ifr.title = "trustless-ai playable";
+    ifr.setAttribute("allow", "autoplay; fullscreen");
+    frame.innerHTML = "";
+    frame.appendChild(ifr);
+    ifr.focus();
+  }, { once: true });
+
+  // News / press — curated, up to 8 cards. Edit this list (newest first) and re-pin.
+  // Each item: { source, date, title, blurb, url, image? }
+  var NEWS = [
+    { source:"GlobeNewswire", date:"Jun 2026", title:"Pocket Network Foundation co-authors an Ethereum standard for decentralized AI-agent validation",
+      blurb:"Pocket Network Foundation co-authors ERC-8294 — a validation-network interface extending ERC-8004 for decentralized AI-agent verification.",
+      image:"./assets/news/1.webp",
+      url:"https://www.globenewswire.com/news-release/2026/06/23/3316365/0/en/pocket-network-foundation-co-authors-ethereum-standard-for-decentralized-ai-agent-validation.html" },
+    { source:"Crypto News", date:"Jun 2026", title:"Pocket Network Foundation leads co-authorship of the ERC-8294 validation standard",
+      blurb:"Decentralized validator networks as a trust layer for AI-agent verification, extending ERC-8004.",
+      image:"./assets/news/o_cryptonews.webp",
+      url:"https://advertorial.cryptonews.com/press-releases/pocket-network-foundation-leads-co-authorship-of-ethereum-standard-for-decentralized-ai-agent-validation/" },
+    { source:"Bitcoin.com", date:"Jun 2026", title:"Pocket Network Foundation co-authors new Ethereum standard for decentralized AI-agent validation",
+      blurb:"Coverage of ERC-8294 — decentralized validator networks as a trust layer for AI-agent verification.",
+      image:"./assets/news/o_bitcoin.webp",
+      url:"https://news.bitcoin.com/pocket-network-foundation-co-authors-new-ethereum-standard-for-decentralized-ai-agent-validation/" },
+    { source:"MasterInvest", date:"Jun 2026", title:"Pocket Network Foundation co-authors Ethereum standard enabling decentralized validation for AI agents",
+      blurb:"ERC-8294 extends ERC-8004 so validator networks can serve as the trust layer for AI-agent verification.",
+      image:"./assets/news/o_masterinvest.webp",
+      url:"https://www.masterinvest.info/kriptovalyuty/novosti-kriptovalyut/1440-pocket-network-foundation-co-authors-ethereum-standard-enabling-decentralized-validation-f.html" },
+    { source:"Binance Square", date:"Jun 2026", title:"Pocket Network Foundation co-authors an Ethereum standard for decentralized AI-agent validation",
+      blurb:"The ERC-8294 co-authorship, covered on Binance Square.",
+      image:"./assets/news/o_binance.webp",
+      url:"https://www.binance.bh/en/square/post/336911491459377" },
+    { source:"EtherWorld", date:"Jun 2026", title:"An overview of WYRIWE — What You Read Is What You Execute",
+      blurb:"A walkthrough of WYRIWE (ERC-8299): triple-hash input-provenance commitments and EIP-712 attestations, so a model executes exactly what was sent.",
+      image:"./assets/news/3.webp",
+      url:"https://etherworld.co/an-overview-of-wyriwe-what-you-read-is-what-you-execute/" },
+    { source:"Ethereum Research", date:"May 2026", title:"Evidential Survivability: OCP and Ethereum's CROPS direction",
+      blurb:"The Observation Commitment Protocol as independent verification infrastructure, aligned with Ethereum's CROPS direction for AI-era governance.",
+      image:"./assets/news/4.webp",
+      url:"https://ethresear.ch/t/evidential-survivability-ocp-and-ethereums-crops-direction/25012" },
+    { source:"Tobira", date:"May 2026", title:"ENSIP-27: an agent-card schema for ENS-based agent discovery",
+      blurb:"ENSIP-27 defines a card schema anchoring agents to on-chain ERC-8004 registries with standardized machine-to-machine resolution.",
+      image:"./assets/news/5.webp",
+      url:"https://blog.tobira.ai/ensip-27-agent-card-schema-ens-discovery/" }
+  ];
+  (function renderNews(){
+    var grid = document.getElementById("newsGrid");
+    if (!grid) return;
+    if (!NEWS.length){ grid.innerHTML = '<p class="news-empty">Coverage will appear here.</p>'; return; }
+    grid.innerHTML = NEWS.slice(0,8).map(function(n){
+      var thumb = '<div class="thumb"' + (n.image ? ' style="background-image:url(\'' + n.image + '\')"' : '') + '></div>';
+      return '<a class="ncard" href="' + n.url + '" target="_blank" rel="noopener">' + thumb +
+        '<div class="body"><span class="meta">' + (n.source||'') + (n.date ? ' · ' + n.date : '') + '</span>' +
+        '<h3>' + n.title + '</h3>' + (n.blurb ? '<span class="blurb">' + n.blurb + '</span>' : '') +
+        '<span class="more">Read →</span></div></a>';
+    }).join('');
+  })();
+
+  // hero mascot subtly dodges the cursor (can't quite click him)
+  (function(){
+    var wrap = document.querySelector('.hero-mascot'); var card = document.querySelector('.hero-card');
+    if (!wrap || !card) return;
+    var img = wrap.querySelector('img'); if (!img) return;
+    card.addEventListener('mousemove', function(e){
+      var r = img.getBoundingClientRect(), cx = r.left+r.width/2, cy = r.top+r.height/2;
+      var dx = e.clientX-cx, dy = e.clientY-cy, d = Math.hypot(dx,dy), R = 190;
+      if (d < R){ var f = 1 - d/R, p = Math.min(38, 44*f), a = Math.atan2(dy,dx);
+        img.style.transform = 'translate(' + (-Math.cos(a)*p) + 'px,' + (-Math.sin(a)*p) + 'px)'; }
+      else img.style.transform = 'translate(0,0)';
+    });
+    card.addEventListener('mouseleave', function(){ img.style.transform = 'translate(0,0)'; });
+  })();
+
+  // reveal the info cards on scroll (wide from left, dark from right)
+  (function(){
+    var cards = document.querySelector('.cards'); if (!cards) return;
+    if (!('IntersectionObserver' in window)){ cards.classList.add('in'); return; }
+    var io = new IntersectionObserver(function(es){ es.forEach(function(en){
+      if (en.isIntersecting){ cards.classList.add('in'); io.disconnect(); } }); }, { threshold:.2 });
+    io.observe(cards);
+  })();
+</script>
+</body>
+</html>

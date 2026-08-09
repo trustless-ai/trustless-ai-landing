@@ -1,0 +1,7 @@
+{
+  "repo": "https://github.com/trustless-ai/cross-reference-console",
+  "commit": "0d26c2491152c20e09671383195a10d4af00a9b5",
+  "artifact": "ui/index.html",
+  "installs_to": "console/index.html",
+  "note": "console/index.html is BUILT from this commit, never hand-copied. Bump this and re-run build/sync_console.py to update the published console."
+}

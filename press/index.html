@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>trustless-ai — About & Press</title>
+<meta name="description" content="What trustless-ai is, what it stands for, and how to verify every claim yourself." />
+<link rel="icon" href="../assets/favicon.ico" sizes="any" />
+<style>
+  @font-face{font-family:'Space Grotesk';src:url('../fonts/SpaceGrotesk.woff2') format('woff2');font-weight:300 700;font-display:swap;}
+  @font-face{font-family:'InterVar';src:url('../fonts/Inter.woff2') format('woff2');font-weight:100 900;font-display:swap;}
+  :root{--bg:#F5F5F5;--ink:#0b0b0f;--dark:#2B2644;--violet:#6D5AE6;--fd:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;--fb:'InterVar','Inter',ui-sans-serif,system-ui,sans-serif;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--fb);-webkit-font-smoothing:antialiased;line-height:1.6;}
+  a{color:var(--violet);text-decoration:none;border-bottom:1px solid rgba(109,90,230,.3);}
+  a:hover{border-color:var(--violet);}
+  .wrap{max-width:44rem;margin:0 auto;padding:56px 24px 80px;}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  header img{height:34px;width:auto;}
+  header .name{font-family:var(--fd);font-size:1.4rem;font-weight:600;letter-spacing:-.03em;border:0;color:var(--ink);}
+  .eyebrow{font-family:var(--fb);color:rgba(11,11,15,.5);font-size:.85rem;letter-spacing:.04em;text-transform:uppercase;margin-bottom:40px;}
+  h1{font-family:var(--fd);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:500;letter-spacing:-.03em;line-height:1.1;margin:0 0 18px;}
+  h2{font-family:var(--fd);font-size:1.25rem;font-weight:600;letter-spacing:-.02em;margin:44px 0 12px;}
+  p{margin:0 0 16px;color:rgba(11,11,15,.82);}
+  .lead{font-size:1.15rem;color:rgba(11,11,15,.9);}
+  ul{list-style:none;margin:0 0 16px;}
+  li{padding:9px 0;border-bottom:1px solid rgba(11,11,15,.07);color:rgba(11,11,15,.82);}
+  li:last-child{border-bottom:0;}
+  li b{font-family:var(--fd);font-weight:600;color:var(--ink);}
+  code{font-family:'Courier New',monospace;font-size:.9em;background:rgba(43,38,68,.06);padding:1px 5px;border-radius:4px;}
+  .rule{font-family:var(--fd);font-size:1.15rem;font-weight:500;letter-spacing:-.01em;color:var(--ink);
+    border-left:3px solid var(--violet);padding:4px 0 4px 18px;margin:6px 0 20px;}
+  footer{margin-top:56px;padding-top:24px;border-top:1px solid rgba(11,11,15,.1);
+    display:flex;gap:22px;flex-wrap:wrap;font-size:.9rem;}
+  footer a{color:rgba(11,11,15,.6);border:0;}
+  footer a:hover{color:var(--ink);}
+  .note{font-size:.82rem;color:rgba(11,11,15,.45);font-style:italic;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="../index.html" style="border:0;display:flex;align-items:center;gap:12px;">
+      <img src="../assets/logo.png" alt="trustless-ai" />
+      <span class="name">trustless-ai</span>
+    </a>
+  </header>
+  <div class="eyebrow">About &amp; Press</div>
+
+  <h1>Infrastructure you never have to trust — only recompute.</h1>
+  <p class="lead">trustless-ai is an open ecosystem of standards, reference implementations and tooling for AI agents: infrastructure anyone can provide, anyone can use, and everyone can verify by recomputing the proof. It is owned by no one.</p>
+
+  <h2>What it stands for</h2>
+  <div class="rule">Don't trust — recompute.</div>
+  <p>Nothing ships that a third party can't independently verify from public data. Every claim is re-derived from the primary artifact, pinned to an exact reference, and answered with a <b>tri-state verdict</b> — verified-good, verified-bad, or unverifiable. "Couldn't check" is its own answer, never a silent pass. There is no pitch here; the substance is the pitch.</p>
+
+  <h2>Verify it yourself</h2>
+  <p>Don't take this page's word for any of it — re-run it:</p>
+  <ul>
+    <li><b><a href="https://github.com/trustless-ai/recompute-kit">recompute-kit</a></b> — the toolchain. Clone it and re-derive any claim yourself.</li>
+    <li><b><a href="https://github.com/trustless-ai/recompute-kit/blob/main/conformance/agent-flow.vectors.json">Conformance vectors</a></b> — public inputs → expected outputs, one row per step; the canonical authority no implementation is trusted above.</li>
+    <li><b><a href="https://github.com/trustless-ai/agent-ercs">agent-ercs</a></b> — the interfaces and audited base implementations for every layer.</li>
+    <li><b><a href="https://github.com/trustless-ai/onchain-boiler-kit">onchain-boiler-kit</a></b> — deploy the stack yourself.</li>
+    <li><b><a href="https://gateway.ensub.org/agent/consult/job/0xbc01b40fe7a3509f35470053d4bc1844d50c9782546cf0fc11154adcb90caa56/proof">A live settlement proof</a></b> — recompute a real mainnet outcome straight from its <code>/proof</code>.</li>
+  </ul>
+
+  <h2>The standards</h2>
+  <p>The agent-standards family — each an ERC or a recomputable reference implementation:</p>
+  <ul>
+    <li><b>ERC-8004</b> — agent identity registry</li>
+    <li><b>ERC-8274</b> — AI inference proof verification</li>
+    <li><b>ERC-8275</b> — reputation from recomputable inputs</li>
+    <li><b>ERC-8299 · WYRIWE</b> — input provenance</li>
+    <li><b>ERC-8301</b> — agent execution / task dispatch</li>
+    <li><b>ERC-8312</b> — bounded agent actions</li>
+    <li><b>ConsultEscrow</b> — pay-on-delivery settlement</li>
+    <li><b>ccip-router</b> — the recompute mesh (nodes re-run proofs, never self-attested)</li>
+  </ul>
+
+  <h2>Founders</h2>
+  <ul>
+    <li><b>Damon Zwicker</b> — <a href="https://github.com/damonzwicker">@damonzwicker</a> · input provenance / OCP (ERC-8281); co-author ERC-8274 &amp; ERC-8299</li>
+    <li><b>Tiago Merlini</b> — <a href="https://github.com/TMerlini">@TMerlini</a> (GobRoss / dinamic.eth) · lead author of WYRIWE (ERC-8299), Source-Token Agent Binding (ERC-8217, companion to ERC-8004) &amp; the mesh-sync ERC (ERC-11800); co-author ERC-8274; composition-note weaver; ccip-router mesh</li>
+    <li><b>Jimmy Shi</b> — <a href="https://github.com/JimmyShi22">@JimmyShi22</a> · agent execution (ERC-8301); lead author ERC-8274; stood up agent-ercs</li>
+    <li><b>Fede</b> — <a href="https://github.com/babyblueviper1">@babyblueviper1</a> · verification &amp; reputation; co-author ERC-8274 &amp; ERC-8299; runs the <a href="https://api.babyblueviper.com/ledger">invinoveritas</a> verdict ledger</li>
+    <li><b>Vincent Wu</b> — <a href="https://github.com/TruthAnchor-AI">@TruthAnchor-AI</a> · ERC-8263 (the Anchor)</li>
+  </ul>
+
+  <h2>Contributors</h2>
+  <ul>
+    <li><b>Panini (Brooks)</b> — <a href="https://github.com/Brooks1003">@Brooks1003</a> · ERC-8275 reputation; settlement</li>
+    <li><b>Pavlo Tvardovskyi</b> — <a href="https://github.com/pipavlo82">@pipavlo82</a> · ReceiptOS; eligibility</li>
+    <li><b>blockbird</b> — ERC-8312 bounded agent actions</li>
+    <li><b>Pocket Network (VNI)</b> — <a href="https://github.com/traciecmyers">Tracie Myers</a> · <a href="https://github.com/RawthiL">Ramiro</a> · ERC-8294 / Validation Network Interface</li>
+  </ul>
+  <p class="note">Each person authors the layer they own; coordination is by hand across channels, and the organization is the shared, CC0 home.</p>
+
+  <h2>Contact &amp; press</h2>
+  <p>The work lives in the open on <a href="https://github.com/trustless-ai">github.com/trustless-ai</a>. For anything specific, the fastest path is an issue on the relevant repository — where it can be checked against the artifact, like everything else.</p>
+
+  <footer>
+    <a href="../index.html">← Home</a>
+    <a href="https://github.com/trustless-ai">GitHub</a>
+    <a href="https://github.com/trustless-ai/recompute-kit">recompute-kit</a>
+    <a href="https://github.com/trustless-ai/agent-ercs">agent-ercs</a>
+    <span style="color:rgba(11,11,15,.4);">CC0 — owned by no one.</span>
+  </footer>
+</div>
+</body>
+</html>

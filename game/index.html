@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>trustless-ai · playable</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#F5F5F5;font-family:ui-sans-serif,system-ui,sans-serif;}
+  #stage{display:block;width:100%;height:100%;touch-action:none;}
+  #hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+    color:rgba(11,11,15,.5);font-size:13px;letter-spacing:.02em;white-space:nowrap;
+    background:rgba(255,255,255,.55);padding:6px 14px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none;}
+  #pop{position:absolute;left:50%;top:22px;transform:translateX(-50%) translateY(-8px);
+    max-width:min(560px,86vw);background:rgba(27,24,48,.93);color:#fff;border-radius:16px;padding:14px 22px;
+    box-shadow:0 18px 44px rgba(43,38,68,.32);opacity:0;pointer-events:none;text-align:center;
+    transition:opacity .25s ease,transform .25s ease;backdrop-filter:blur(8px);}
+  #pop.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #pop b{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c9c2ff;margin-bottom:5px;
+    font-family:ui-sans-serif,system-ui,sans-serif;}
+  #pop span{font-size:14px;line-height:1.5;color:rgba(255,255,255,.9);}
+  #pop a{display:inline-block;margin-top:10px;font-size:12.5px;font-weight:600;color:#a9a0f5;pointer-events:auto;
+    text-decoration:none;border-bottom:1px solid rgba(169,160,245,.45);padding-bottom:1px;
+    font-family:ui-sans-serif,system-ui,sans-serif;transition:color .2s,border-color .2s;}
+  #pop a:hover{color:#fff;border-color:#fff;}
+
+  /* mobile touch controls — hidden unless the device is touch */
+  .ctl{display:none;position:absolute;z-index:5;pointer-events:auto;touch-action:none;-webkit-user-select:none;user-select:none;}
+  body.touch .ctl{display:flex;}
+  body.touch #hint{display:none;}
+  #joy{left:22px;bottom:26px;width:116px;height:116px;border-radius:50%;
+    background:rgba(43,38,68,.09);border:1.5px solid rgba(43,38,68,.16);align-items:center;justify-content:center;}
+  #joyKnob{width:48px;height:48px;border-radius:50%;background:rgba(43,38,68,.26);
+    border:1.5px solid rgba(255,255,255,.55);transition:background .1s;}
+  #joy.active #joyKnob{background:rgba(109,90,230,.6);}
+  .btn{align-items:center;justify-content:center;border-radius:50%;border:1.5px solid rgba(43,38,68,.18);
+    background:rgba(43,38,68,.10);color:rgba(43,38,68,.4);font-size:22px;line-height:1;cursor:pointer;
+    transition:background .1s,color .1s,transform .1s;padding:0;}
+  .btn .g{transform:translateY(-1px);pointer-events:none;}
+  .btn.pressed{background:rgba(109,90,230,.55);color:#fff;transform:scale(.94);}
+  #btnJump{right:24px;bottom:26px;width:74px;height:74px;font-size:24px;}
+  #btnRun{right:112px;bottom:34px;width:58px;height:58px;}
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<div id="pop"><b id="popT"></b><span id="popD"></span><br/><a id="popL" target="_blank" rel="noopener"></a></div>
+<div id="hint">← → / A D to move · Shift to run · Space to jump · hit the blocks</div>
+
+<div id="joy" class="ctl"><div id="joyKnob"></div></div>
+<button id="btnRun" class="ctl btn" aria-label="run"><span class="g">»</span></button>
+<button id="btnJump" class="ctl btn" aria-label="jump"><span class="g">▲</span></button>
+<script>
+(function(){
+  var cv = document.getElementById('stage');
+  var ctx = cv.getContext('2d');
+  var FRAME = 640;
+  // art natural facing: these sheets face RIGHT; flip when moving left
+  var FACE_RIGHT = true;
+
+  var SHEETS = {
+    idle: { src:'sprites/idle.webp', frames:8,  fps:6  },
+    walk: { src:'sprites/walk.webp', frames:8,  fps:11 },
+    run:  { src:'sprites/run.webp',  frames:10, fps:16 },
+    jump: { src:'sprites/jump.webp', frames:8,  fps:10 }
+  };
+
+  var loaded = 0, total = 0, ready = false;
+  for (var k in SHEETS){ total++; (function(s){ var im=new Image(); im.onload=function(){ if(++loaded===total) ready=true; }; im.src=s.src; s.img=im; })(SHEETS[k]); }
+
+  // ---- Collectible knowledge blocks ----
+  var ITEM_IMGS = ['items/q.png','items/orb.png','items/mirror.png','items/cube.png','items/eth.png'].map(function(src){ var i=new Image(); i.src=src; return i; });
+  var AE = 'https://github.com/trustless-ai/agent-ercs';
+  var FACTS = [
+    {t:"ERC-8004", d:"Agent identity — an on-chain registry of agentId, reputation and validation the whole stack builds on.", u:AE+'/tree/main/contracts/identity/ERC8004'},
+    {t:"ERC-8274", d:"AI inference proof verification — the interfaces a verifier uses to check an agent's output.", u:AE+'/tree/main/contracts/verify/ERC8274'},
+    {t:"ERC-8275", d:"Reputation from recomputable inputs: win-rate and operator diversity read from public events, not self-reported.", u:AE},
+    {t:"ERC-8299 · WYRIWE", d:"Input provenance — binds what a user submitted to what the model actually received, via a public replayable pipeline.", u:AE+'/tree/main/contracts/verify/ERC8299'},
+    {t:"ERC-8301", d:"Agent execution — an on-chain state machine for task dispatch and orchestration.", u:AE+'/tree/main/contracts/execution/ERC8301'},
+    {t:"ERC-8312", d:"Bounded actions — an aggregate ≤ cap invariant, so an agent can't spend past what it reserved.", u:AE},
+    {t:"ConsultEscrow", d:"Pay-on-delivery settlement — funds release only on the attestor's signature over a job-bound commitment, else refund after a deadline.", u:AE+'/tree/main/contracts/settlement/ConsultEscrow'},
+    {t:"recompute-kit", d:"Don't trust — recompute. Every claim re-derived from the primary artifact, answered with a tri-state verdict.", u:'https://github.com/trustless-ai/recompute-kit'},
+    {t:"onchain-boiler-kit", d:"A no-code scaffold for trustless agents — deploy the whole stack without writing the plumbing.", u:'https://github.com/trustless-ai/onchain-boiler-kit'},
+    {t:"agent-ercs", d:"The OpenZeppelin for AI agents — production interfaces and audited base implementations for every layer.", u:AE},
+    {t:"ccip-router", d:"The recompute mesh — independent nodes re-run every proof node-side, never self-attested.", u:'https://github.com/trustless-ai'},
+    {t:"AccountabilityRecord", d:"The settlement attestation shape — verifierKey, settlementRef and verdictHash tie an outcome to its on-chain proof.", u:'https://api.babyblueviper.com/ledger'},
+    {t:"Ethereum", d:"The settlement layer under it all — every proof in the stack roots to a block on Ethereum mainnet, checkable by anyone.", u:'https://ethereum.org'}
+  ];
+  var items = [], factQueue = [];
+  function nextFact(){ if(!factQueue.length){ factQueue = FACTS.slice(); for(var i=factQueue.length-1;i>0;i--){ var j=(Math.random()*(i+1))|0, t=factQueue[i]; factQueue[i]=factQueue[j]; factQueue[j]=t; } } return factQueue.pop(); }
+  function itemSize(){ return Math.max(46, charH*0.34); }
+  function spawnItem(it){
+    it = it || {};
+    it.x = W*(0.16 + Math.random()*0.68);
+    it.baseY = groundY - charH*(0.62 + Math.random()*0.55);
+    it.img = ITEM_IMGS[(Math.random()*ITEM_IMGS.length)|0];
+    it.phase = Math.random()*6.28; it.alive = true; it.cd = 0;
+    return it;
+  }
+  function initItems(){ items=[]; for(var i=0;i<3;i++) items.push(spawnItem()); }
+
+  var pop=document.getElementById('pop'), popT=document.getElementById('popT'), popD=document.getElementById('popD'), popL=document.getElementById('popL'), popTimer=0;
+  function showPop(f){
+    popT.textContent=f.t; popD.textContent=f.d;
+    if (f.u){ var host=f.u.replace(/^https?:\/\//,'').split('/')[0];
+      popL.href=f.u; popL.textContent=(host.indexOf('github')>=0?'View on GitHub':host)+' →'; popL.style.display='inline-block'; }
+    else popL.style.display='none';
+    pop.classList.add('show'); clearTimeout(popTimer);
+    popTimer=setTimeout(function(){ pop.classList.remove('show'); }, 6500);
+  }
+
+  var DPR = Math.min(2, window.devicePixelRatio||1);
+  var W=0, H=0, groundY=0, charH=0;
+  function resize(){
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.floor(W*DPR); cv.height = Math.floor(H*DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    charH = Math.max(120, Math.min(210, H*0.36));
+    groundY = H - Math.max(70, H*0.16);
+    if (p.y > groundY) p.y = groundY;
+    p.x = Math.min(Math.max(p.x, charH*0.4), W - charH*0.4);
+  }
+
+  var keys = {};
+  function down(e){ var c=code(e); if(c){ keys[c]=true; if(['left','right','up','space'].indexOf(c)>=0) e.preventDefault(); } }
+  function up(e){ var c=code(e); if(c) keys[c]=false; }
+  function code(e){
+    switch(e.key){
+      case 'ArrowLeft': case 'a': case 'A': return 'left';
+      case 'ArrowRight': case 'd': case 'D': return 'right';
+      case 'ArrowUp': case 'w': case 'W': return 'up';
+      case ' ': case 'Spacebar': return 'space';
+      case 'Shift': return 'shift';
+    }
+    return null;
+  }
+  window.addEventListener('keydown', down); window.addEventListener('keyup', up);
+  window.addEventListener('blur', function(){ keys={}; });
+
+  // touch controls state
+  var touch = { dx:0, run:false }, jumpQueued = false;
+
+  var p = { x: 240, y: 400, vy:0, onGround:true, face:1, state:'idle', anim:0 };
+  var GRAV=2000, WALK=195, RUN=340, JUMP=760;
+
+  var last=0;
+  function frame(t){
+    var dt = last ? Math.min(0.05, (t-last)/1000) : 0; last=t;
+    if (ready) { update(dt); draw(); }
+    requestAnimationFrame(frame);
+  }
+
+  function update(dt){
+    var dir = (keys.left?-1:0) + (keys.right?1:0);
+    if (dir===0 && Math.abs(touch.dx)>0.28) dir = touch.dx<0 ? -1 : 1;
+    var running = keys.shift || touch.run;
+    var speed = running ? RUN : WALK;
+
+    if (dir!==0){ p.x += dir*speed*dt; p.face = dir; }
+    p.x = Math.min(Math.max(p.x, charH*0.38), W - charH*0.38);
+
+    if ((keys.up || keys.space || jumpQueued) && p.onGround){ p.vy = -JUMP; p.onGround=false; }
+    jumpQueued = false;
+    p.vy += GRAV*dt; p.y += p.vy*dt;
+    if (p.y >= groundY){ p.y = groundY; p.vy=0; p.onGround=true; }
+
+    var st;
+    if (!p.onGround) st='jump';
+    else if (dir!==0) st = running ? 'run' : 'walk';
+    else st='idle';
+    if (st!==p.state){ p.state=st; p.anim=0; }
+    p.anim += dt;
+
+    // knowledge blocks: bob, collide, respawn
+    var now = performance.now()/1000;
+    var isz = itemSize(), ihw = isz*0.5;
+    var cx = p.x, cy = p.y - charH*0.5, hw = charH*0.26, hh = charH*0.33;
+    for (var i=0;i<items.length;i++){
+      var it = items[i];
+      if (!it.alive){ it.cd -= dt; if (it.cd<=0) spawnItem(it); continue; }
+      it.y = it.baseY + Math.sin(now*2 + it.phase)*7;
+      if (Math.abs(cx-it.x) < hw+ihw && Math.abs(cy-it.y) < hh+ihw){
+        it.alive = false; it.cd = 1.6; showPop(nextFact());
+      }
+    }
+  }
+
+  function draw(){
+    // background — soft premium light gradient
+    var g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#ffffff'); g.addColorStop(0.55,'#f3f1fb'); g.addColorStop(1,'#e9e6fa');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    // soft floating blobs
+    blob(W*0.22, H*0.30, H*0.34, 'rgba(183,171,255,0.28)');
+    blob(W*0.80, H*0.24, H*0.30, 'rgba(151,201,255,0.22)');
+    // ground band
+    var gg = ctx.createLinearGradient(0,groundY,0,H);
+    gg.addColorStop(0,'rgba(43,38,68,0.05)'); gg.addColorStop(1,'rgba(43,38,68,0.10)');
+    ctx.fillStyle=gg; ctx.fillRect(0,groundY,W,H-groundY);
+    ctx.strokeStyle='rgba(43,38,68,0.12)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,groundY+0.5); ctx.lineTo(W,groundY+0.5); ctx.stroke();
+
+    // knowledge blocks (behind the character), each with a soft glow
+    var isz = itemSize();
+    ctx.imageSmoothingEnabled = false;
+    for (var i=0;i<items.length;i++){
+      var it = items[i];
+      if (!it.alive || !it.img.complete || !it.img.naturalWidth) continue;
+      ctx.save(); ctx.globalAlpha = 0.55;
+      var rg = ctx.createRadialGradient(it.x,it.y,0,it.x,it.y,isz*0.95);
+      rg.addColorStop(0,'rgba(150,200,255,0.55)'); rg.addColorStop(1,'rgba(150,200,255,0)');
+      ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(it.x,it.y,isz*0.95,0,6.283); ctx.fill(); ctx.restore();
+      var iw=it.img.naturalWidth, ih=it.img.naturalHeight, sc=isz/Math.max(iw,ih), dw=iw*sc, dh=ih*sc;
+      ctx.drawImage(it.img, it.x-dw/2, it.y-dh/2, dw, dh);
+    }
+
+    // shadow (shrinks with height off ground)
+    var h = Math.max(0, groundY - p.y);
+    var t = Math.max(0.35, 1 - h/260);
+    ctx.save(); ctx.globalAlpha = 0.18*t;
+    ctx.fillStyle = '#2B2644';
+    ctx.beginPath();
+    ctx.ellipse(p.x, groundY+6, charH*0.26*t, charH*0.06*t, 0, 0, Math.PI*2);
+    ctx.fill(); ctx.restore();
+
+    // sprite
+    var s = SHEETS[p.state];
+    var fi = Math.floor(p.anim * s.fps) % s.frames;
+    var dw = charH, dh = charH;
+    var dx = p.x - dw/2, dy = p.y - dh; // feet at p.y
+    var flip = FACE_RIGHT ? (p.face<0) : (p.face>0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.save();
+    if (flip){ ctx.translate(dx+dw, dy); ctx.scale(-1,1); ctx.drawImage(s.img, fi*FRAME,0,FRAME,FRAME, 0,0, dw,dh); }
+    else     { ctx.drawImage(s.img, fi*FRAME,0,FRAME,FRAME, dx,dy, dw,dh); }
+    ctx.restore();
+  }
+  function blob(x,y,r,col){
+    var rg = ctx.createRadialGradient(x,y,0,x,y,r);
+    rg.addColorStop(0,col); rg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  }
+
+  // make sure keyboard focus lands here (esp. inside the click-to-play iframe)
+  cv.addEventListener('pointerdown', function(){ try{ window.focus(); }catch(e){} });
+  try{ window.focus(); }catch(e){}
+
+  // ---- touch controls wiring ----
+  var joy=document.getElementById('joy'), knob=document.getElementById('joyKnob');
+  var bJump=document.getElementById('btnJump'), bRun=document.getElementById('btnRun');
+  var joyId=null, joyCX=0, joyCY=0, JR=46;
+  joy.addEventListener('pointerdown', function(e){ e.preventDefault(); joy.classList.add('active'); joyId=e.pointerId;
+    try{ joy.setPointerCapture(e.pointerId); }catch(_){} var r=joy.getBoundingClientRect(); joyCX=r.left+r.width/2; joyCY=r.top+r.height/2; joyMove(e); });
+  function joyMove(e){ if(e.pointerId!==joyId) return; var dx=e.clientX-joyCX, dy=e.clientY-joyCY, d=Math.hypot(dx,dy), m=Math.min(1,d/JR), a=Math.atan2(dy,dx);
+    knob.style.transform='translate('+(Math.cos(a)*JR*m)+'px,'+(Math.sin(a)*JR*m)+'px)'; touch.dx=Math.max(-1,Math.min(1,dx/JR)); }
+  joy.addEventListener('pointermove', joyMove);
+  function joyEnd(e){ if(e.pointerId!==joyId) return; joy.classList.remove('active'); joyId=null; knob.style.transform='translate(0,0)'; touch.dx=0; }
+  joy.addEventListener('pointerup', joyEnd); joy.addEventListener('pointercancel', joyEnd);
+
+  bJump.addEventListener('pointerdown', function(e){ e.preventDefault(); bJump.classList.add('pressed'); jumpQueued=true; });
+  bRun.addEventListener('pointerdown', function(e){ e.preventDefault(); bRun.classList.add('pressed'); touch.run=true; });
+  ['pointerup','pointerleave','pointercancel'].forEach(function(ev){
+    bJump.addEventListener(ev, function(){ bJump.classList.remove('pressed'); });
+    bRun.addEventListener(ev, function(){ bRun.classList.remove('pressed'); touch.run=false; });
+  });
+
+  // show controls only on touch devices
+  if ((window.matchMedia && matchMedia('(pointer: coarse)').matches) || ('ontouchstart' in window) || navigator.maxTouchPoints>0)
+    document.body.classList.add('touch');
+
+  window.addEventListener('resize', resize);
+  resize();
+  initItems();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
