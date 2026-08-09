@@ -66,8 +66,17 @@ def build(lock: dict) -> bytes:
         # Build twice. A console commit whose build is not deterministic cannot
         # be published under the two-party pin rule at all — better to fail here,
         # loudly, than to pin something no second party can reproduce.
-        subprocess.run([sys.executable, "ui/embed_snapshot.py"],
-                       capture_output=True, text=True, cwd=wt)
+        b2 = subprocess.run([sys.executable, "ui/embed_snapshot.py"],
+                            capture_output=True, text=True, cwd=wt)
+        # Check the SECOND build too. If it fails, the first build's artifact is
+        # still sitting there, so reading it back would compare a file to itself
+        # and report determinism that was never demonstrated.
+        if b2.returncode != 0:
+            raise SystemExit(
+                f"second build of {lock['commit'][:12]} failed, so determinism was\n"
+                "never demonstrated — the first build's artifact is still in place\n"
+                "and comparing it to itself would prove nothing.\n"
+                + (b2.stderr.strip().splitlines() or ["(no stderr)"])[-1][:200])
         second = art.read_bytes()
         if first != second:
             raise SystemExit(

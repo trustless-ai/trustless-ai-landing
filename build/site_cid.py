@@ -77,6 +77,13 @@ def site_cid(params: dict):
         args.append(f"--chunker={params['chunker']}")
     if params.get("hash"):
         args.append(f"--hash={params['hash']}")
+    # Explicit, never inherited. --cid-version=1 implies raw-leaves=true today,
+    # but relying on that means the CID depends on an ipfs default we do not
+    # control and did not record.
+    if params.get("raw_leaves") is False:
+        args.append("--raw-leaves=false")
+    elif params.get("raw_leaves") is True:
+        args.append("--raw-leaves=true")
     # Exclusions must match `published_files()`, or the CID would cover a
     # different set than the tree hash and the two would silently disagree.
     for d in sorted(EXCLUDE_DIRS | {f for f in EXCLUDE_FILES}):
