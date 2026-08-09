@@ -35,6 +35,14 @@ import tempfile
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 LOCK = ROOT / "console.lock"
 
+# This script CLONES the repo named in console.lock and runs its build. The lock
+# is PR-reviewed rather than untrusted input, so the risk is lower than a pin
+# record — but it is the same shape (data naming the code that runs), and an
+# allowlist costs nothing. Kept here, in the tool, not in the file it reads.
+ALLOWED_CONSOLE_REPOS = {
+    "https://github.com/trustless-ai/cross-reference-console",
+}
+
 
 def sha(b: bytes) -> str:
     return "sha256:" + hashlib.sha256(b).hexdigest()
@@ -42,6 +50,12 @@ def sha(b: bytes) -> str:
 
 def build(lock: dict) -> bytes:
     """Clone the pinned commit into a temp dir and run its own build."""
+    repo = lock["repo"].rstrip("/").removesuffix(".git")
+    if repo not in ALLOWED_CONSOLE_REPOS:
+        raise SystemExit(
+            f"console.lock names {lock['repo']!r}, which is not in this tool's\n"
+            "allowlist. Building it would execute code from a repository chosen\n"
+            "by a data file. Refusing.")
     with tempfile.TemporaryDirectory() as td:
         wt = pathlib.Path(td) / "console"
         r = subprocess.run(["git", "clone", "--quiet", "--no-checkout",
