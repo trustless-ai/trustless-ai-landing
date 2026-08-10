@@ -97,7 +97,26 @@ def build(lock: dict) -> bytes:
                 f"console commit {lock['commit'][:12]} does NOT build deterministically —\n"
                 "two builds of one commit differ, so no second party could ever confirm\n"
                 "the CID. Lock a commit that includes the reproducible-build fix.")
-        return first
+        # Stamp the source commit into the page it was built from. Damon's point,
+        # after the code/data split failed both ways in a week: the page must be
+        # able to say what it is, because both diagnoses required someone grepping
+        # the live HTML by hand.
+        #
+        # Stamped HERE rather than in the console repo because only the PUBLISHED
+        # page has a commit to name — ui/index.html in its own repo cannot know
+        # the hash of the commit that will contain it. Inside build() so --check
+        # and the write path stamp identically by construction; the substitution
+        # is deterministic, so two builds of one commit still compare equal.
+        stamped = first.replace(b"__CONSOLE_SOURCE_COMMIT__",
+                                lock["commit"].encode())
+        if stamped == first:
+            raise SystemExit(
+                f"the build of {lock['commit'][:12]} contains no "
+                "__CONSOLE_SOURCE_COMMIT__ placeholder, so the published page "
+                "could not say which commit it came from.\n"
+                "Refusing: a page that cannot state its own provenance is exactly "
+                "what cost us two hand-diagnoses this week.")
+        return stamped
 
 
 def main() -> int:
