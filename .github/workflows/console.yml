@@ -1,0 +1,58 @@
+name: console
+
+# The lineage marker decides what a human sees when independence is unproven, absent or
+# uninterpretable. It had no test, because the mapping lived inline in a DOM branch and
+# could not be called. It can now, so it is checked on every PR — a test nobody runs is
+# the same defect one level up.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lineage-marker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Lineage marker contract
+        run: bun console/lineage-marker.test.ts
+
+      # A passing suite proves nothing until it has been watched failing. This restores the
+      # exact defect that shipped — absent lineage state rendering no marker — and requires
+      # the tests to catch it.
+      - name: Negative control — the old fail-open must be caught
+        run: |
+          cp console/lineage-marker.js /tmp/lm.bk
+          python3 - <<'PY'
+          import pathlib
+          p = pathlib.Path("console/lineage-marker.js"); t = p.read_text()
+          t = t.replace(
+              "    if (lin === null || lin === undefined) {\n      return unproven('lineage state unavailable",
+              "    if (lin === null || lin === undefined) {\n      return { state:'', addClass:[], removeClass:[], tail:'', qualified:true };\n    }\n    if (false) {\n      return unproven('lineage state unavailable",
+              1)
+          p.write_text(t)
+          PY
+          set +e
+          bun console/lineage-marker.test.ts > /tmp/neg.out 2>&1
+          rc=$?
+          set -e
+          cp /tmp/lm.bk console/lineage-marker.js
+          if [ "$rc" -eq 0 ]; then
+            echo "::error::the tests passed against the defect they exist to catch"
+            cat /tmp/neg.out
+            exit 1
+          fi
+          grep -q "null -> NOT PROVEN, never a bare green" /tmp/neg.out || { echo "::error::failed, but not on the regression case"; cat /tmp/neg.out; exit 1; }
+          echo "negative control caught the fail-open (exit $rc)"
+
+      - name: Tree unchanged by the control
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::control left the tree dirty"; git status --porcelain; exit 1
+          fi
