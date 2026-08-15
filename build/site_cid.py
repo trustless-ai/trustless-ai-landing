@@ -14,10 +14,25 @@ Fixing the parameters is what makes "we both got the same CID" a meaningful clai
 
     python3 build/site_cid.py            # print the directory CID + tree hash
     python3 build/site_cid.py --json     # machine-readable, for a pin record
+    python3 build/site_cid.py --store    # ALSO store the bytes, and pin them
 
 Requires an `ipfs` binary for the CID. Without one it still prints the tree hash
 — which is the byte-agreement authority — and says plainly that the CID was not
 computed. Could-not-check is never a pass.
+
+WHY `--store` EXISTS. The derivation runs `ipfs add -n`, which is hash-only: it
+stores NOTHING. That is correct for asking "what would the CID be", and it is a
+trap at the one moment that matters. On the 15 August repin it printed a CID for
+bytes that existed in no repository anywhere, the contenthash was set to it, and
+the site was unreachable until the bytes were added separately by hand — a
+published pointer to nothing, which is worse than a stale pointer because it looks
+deliberate.
+
+So storing is now part of the tool rather than a step someone has to remember, and
+the equality is the check: `--store` re-runs the SAME command without `-n` and
+refuses to report success unless the stored CID equals the derived one. Different
+CIDs mean the parameters drifted between the two runs, and the honest outcome then
+is exit 2 — not a pin.
 """
 
 import argparse
@@ -66,10 +81,17 @@ def tree_hash(files) -> str:
     return "sha256:" + h.hexdigest()
 
 
-def site_cid(params: dict):
+def site_cid(params: dict, store: bool = False):
+    """Derive the directory CID. With store=True the bytes are actually written.
+
+    `-n` is the ONLY difference between the two calls. Keeping them one function
+    is deliberate: two functions would let the parameters drift, and a stored CID
+    that differs from the derived one is exactly the disagreement this whole file
+    exists to make impossible.
+    """
     if not shutil.which("ipfs"):
         return None
-    args = ["ipfs", "add", "-Q", "-n", "-r"]
+    args = ["ipfs", "add", "-Q", "-r"] if store else ["ipfs", "add", "-Q", "-n", "-r"]
     args.append(f"--cid-version={params.get('cid_version', 1)}")
     if params.get("wrap_with_directory"):
         args.append("-w")
@@ -99,12 +121,40 @@ def site_cid(params: dict):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--store", action="store_true",
+                    help="also STORE the bytes (not just hash them) and pin them locally")
     args = ap.parse_args()
 
     params = json.loads(PARAMS.read_text())["cid_params"]
     files = published_files()
     th = tree_hash(files)
     cid = site_cid(params)
+
+    if args.store:
+        if cid is None:
+            print("UNVERIFIABLE — no usable `ipfs` binary, so nothing was stored.", file=sys.stderr)
+            return 2
+        stored = site_cid(params, store=True)
+        if stored is None:
+            print("UNVERIFIABLE — the store run failed; the bytes may not be held.", file=sys.stderr)
+            return 2
+        if stored != cid:
+            # Never pin, never report success. The two runs disagreed about what
+            # they were describing, and a contenthash set from either would be a
+            # pointer whose meaning nobody can reproduce.
+            print(f"FAIL  derived {cid}\n      stored  {stored}\n"
+                  f"      The two runs disagree — the parameters drifted between them.",
+                  file=sys.stderr)
+            return 1
+        pin = subprocess.run(["ipfs", "pin", "add", "--recursive", stored],
+                             capture_output=True, text=True)
+        if pin.returncode != 0:
+            print(f"UNVERIFIABLE — stored {stored} but could not pin it: "
+                  f"{pin.stderr.strip().splitlines()[-1] if pin.stderr.strip() else '(no output)'}",
+                  file=sys.stderr)
+            return 2
+        print(f"  stored and pinned : {stored}")
+        print("                      derived and stored CIDs agree — these bytes exist locally")
 
     if args.json:
         print(json.dumps({"tree_sha256": th, "cid": cid, "cid_params": params,
