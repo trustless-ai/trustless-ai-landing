@@ -19,6 +19,19 @@ jobs:
           # CID. This is the check that keeps that from recurring.
           python3 build/sync_console.py --check
 
+      # ...and the lock itself must be current, which is a different question. On 2026-08-15
+      # the published console was two days and fifteen commits behind while THREE checks were
+      # green: the sync (console == build of the lock), cross-reference-console's own
+      # reproducibility check, and the ENS currency check (contenthash == site-tree at HEAD).
+      # None was wrong. The lock was, and nothing was looking at the lock. A pin says which
+      # commit is published, never that it is the one you would want.
+      #
+      # Non-blocking: a STALE lock is a publishing decision (it costs a transaction to repin),
+      # not a broken build. It must be VISIBLE, not silent.
+      - name: is console.lock current with upstream?
+        continue-on-error: true
+        run: python3 build/check_console_currency.py
+
       - name: site CID is derivable and its parameters are recorded
         run: |
           # Not asserting a particular CID — that changes with every content
