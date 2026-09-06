@@ -1,0 +1,444 @@
+<title>Semantic ABI for Ethereum â demo (mock)</title>
+<style>
+  :root{
+    --ink:#0C0D11; --panel:#14161C; --panel2:#181B22; --panel3:#1E212A; --line:#ffffff14; --line2:#ffffff0a;
+    --paper:#F2F3F6; --muted:#8A90A0; --faint:#5A6070;
+    --brass:#E0A24C; --brassdim:#A15E1E; --pq:#7FD1FF; --pqbg:#7fd1ff14;
+    --pass:#4ADE9E; --passbg:#4ade9e16; --fail:#FF6B6B; --failbg:#ff6b6b1a;
+    --cant:#8A8560; --cantbg:#8a856018; --viol:#FFB454; --pres:#4ADE9E;
+    --f-disp:"Space Grotesk", ui-sans-serif, "Helvetica Neue", Arial, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --f-serif:"Newsreader", Georgia, serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--f-disp);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 20px 60px}
+  .ribbon{background:var(--brassdim);color:#000;font-family:var(--f-mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;text-align:center;padding:5px;font-weight:600}
+  .mono{font-family:var(--f-mono)}
+
+  header.cover{padding:30px 0 20px;border-bottom:1px solid var(--line)}
+  .coverrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .mark{width:36px;height:36px;flex:none}
+  .brand b{font-size:15px;font-weight:600;letter-spacing:-.02em}
+  .brand span{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .event{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border:1px dashed #ffffff2e;border-radius:8px;padding:7px 12px}
+  .event b{color:var(--brass)}
+  h1{font-size:clamp(23px,4vw,36px);font-weight:600;letter-spacing:-.03em;margin:18px 0 6px;text-wrap:balance;max-width:22ch}
+  h1 em{color:var(--brass);font-style:normal}
+  .lede{font-family:var(--f-serif);font-size:17px;color:var(--muted);max-width:70ch;margin:6px 0 0}
+  .lede b{color:var(--paper);font-weight:600}
+
+  /* pipeline strip */
+  .pipe{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px;font-family:var(--f-mono);font-size:10.5px;color:var(--faint)}
+  .pipe .p{border:1px solid var(--line);border-radius:6px;padding:5px 9px;color:var(--muted)}
+  .pipe .p.hot{border-color:#E0A24C55;color:var(--brass)}
+  .pipe .ar{color:var(--faint)}
+
+  .grid{display:grid;gap:18px;margin-top:20px}
+  @media(min-width:900px){.grid{grid-template-columns:390px 1fr;align-items:start}}
+  .card{border:1px solid var(--line);border-radius:14px;background:var(--panel2);overflow:hidden}
+  .card > .h{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;justify-content:space-between}
+  .card > .h .t{font-family:var(--f-mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint)}
+
+  /* agent */
+  .agent{padding:16px}
+  .aid{display:flex;align-items:center;gap:12px}
+  .avatar{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#E0A24C,#A15E1E 60%,#4a2b12);flex:none;position:relative}
+  .avatar::after{content:"";position:absolute;inset:0;margin:auto;width:6px;height:6px;background:var(--ink);border-radius:50%}
+  .aid .nm{font-size:15px;font-weight:600}.aid .sub{font-family:var(--f-mono);font-size:10.5px;color:var(--brass)}
+  .aid .id{font-family:var(--f-mono);font-size:10px;color:var(--faint);margin-top:1px}
+  .pq{margin-top:14px;border:1px solid #7fd1ff33;background:var(--pqbg);border-radius:11px;padding:11px 12px}
+  .pq .ph{display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.05em;color:var(--pq);font-weight:600}
+  .pq .lk{width:12px;height:12px}
+  .pqfam{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+  .fam{border:1px solid #7fd1ff30;border-radius:7px;padding:4px 8px;font-family:var(--f-mono);font-size:10px}.fam b{color:var(--pq)}
+  .pqmeta{margin-top:9px;font-family:var(--f-mono);font-size:10px;color:var(--muted);line-height:1.7}.pqmeta .g{color:var(--pass)}
+  .pqverify{margin-top:9px;width:100%;background:transparent;color:var(--pq);border:1px solid #7fd1ff44;border-radius:8px;padding:7px;font:600 12px var(--f-disp);cursor:pointer}
+  .pqverify:hover{background:#7fd1ff1a}
+  #pqout{font-family:var(--f-mono);font-size:10px;color:var(--muted);margin-top:7px;min-height:12px}#pqout .g{color:var(--pass)}
+  .chat{margin-top:15px;border-top:1px solid var(--line2);padding-top:13px}
+  .msgs{display:flex;flex-direction:column;gap:8px;max-height:180px;overflow-y:auto;padding-right:4px}
+  .msg{font-size:13px;line-height:1.5;padding:8px 11px;border-radius:11px;max-width:92%}
+  .msg.u{align-self:flex-end;background:var(--panel3);border:1px solid var(--line)}
+  .msg.a{align-self:flex-start;background:#E0A24C12;border:1px solid #E0A24C33}
+  .msg .rc{display:block;margin-top:6px;font-family:var(--f-mono);font-size:9.5px;color:var(--brass);border-top:1px solid #ffffff14;padding-top:5px}
+  .composer{display:flex;gap:8px;margin-top:11px}
+  .composer input{flex:1;background:var(--ink);border:1px solid var(--line);border-radius:9px;color:var(--paper);padding:9px 11px;font:13px var(--f-disp)}
+  .composer input:focus{outline:none;border-color:var(--brass)}
+  .composer button{background:var(--brass);color:#000;border:0;border-radius:9px;padding:0 14px;font:600 13px var(--f-disp);cursor:pointer}
+  .composer button:disabled{opacity:.5}
+
+  /* subject + toggles */
+  .subject{padding:11px 16px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;background:#ffffff05}
+  .subject .lab{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .subject .rid{font-family:var(--f-mono);font-size:11.5px}.subject .rid b{color:var(--brass)}
+  .subject .spacer{flex:1}
+  .tw{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:10.5px;color:var(--muted);cursor:pointer;user-select:none}
+  .tw input{accent-color:var(--viol)}
+
+  /* matrix */
+  .matrixwrap{overflow-x:auto;padding:4px 6px}
+  table{border-collapse:separate;border-spacing:0;width:100%;min-width:600px}
+  th,td{text-align:left;padding:0}
+  thead th{padding:10px;vertical-align:bottom}
+  .relhdr{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);width:34%}
+  .syshdr .nm{font-size:12.5px;font-weight:600}.syshdr .who{font-family:var(--f-mono);font-size:9.5px;color:var(--brass)}
+  .relcell{padding:11px 10px;border-top:1px solid var(--line2);vertical-align:top}
+  .relcell .rn{font-weight:600;font-size:13px}
+  .relcell .rp{font-family:var(--f-mono);font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5}.relcell .rp .neq{color:var(--brass)}
+  .cell{border-top:1px solid var(--line2);padding:8px}
+  .chip{width:100%;border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:9px;cursor:pointer;display:flex;flex-direction:column;gap:6px;text-align:left;color:inherit;font:inherit;transition:border-color .15s}
+  .chip:hover{border-color:#ffffff33}.chip.sel{border-color:var(--brass)}.chip:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .lvl{display:flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:10.5px}
+  .lvl .k{color:var(--faint);width:56px;flex:none}
+  .lvl .badge{font-weight:600;letter-spacing:.02em}
+  .b-pass{color:var(--pass)} .b-fail{color:var(--fail)} .b-cant{color:var(--cant)}
+  .p-preserved{color:var(--pres)} .p-violated{color:var(--viol)} .p-unverifiable{color:var(--cant)}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .d-pass{background:var(--pass);box-shadow:0 0 7px var(--pass)} .d-fail{background:var(--fail);box-shadow:0 0 9px var(--fail)} .d-cant{background:var(--cant)}
+  .chip.bg-fail{background:var(--failbg)} .chip.bg-pass{background:var(--passbg)} .chip.bg-cant{background:var(--cantbg)}
+  .deriving{opacity:.6}
+
+  .barstats{display:flex;align-items:center;gap:16px;padding:11px 16px;border-top:1px solid var(--line2);flex-wrap:wrap}
+  .stat .n{font-family:var(--f-mono);font-size:16px}.stat .n b{color:var(--pass)}
+  .stat .l{font-family:var(--f-mono);font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+  .badge2{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-family:var(--f-mono);font-size:10px;color:var(--muted)}
+  .badge2 .d{width:5px;height:5px;border-radius:50%;background:var(--brass)}
+  .vtoggle{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .vtoggle .cap{font-family:var(--f-mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint)}
+  .seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .seg button{background:transparent;color:var(--muted);border:0;font-family:var(--f-mono);font-size:10px;padding:5px 8px;cursor:pointer}
+  .seg button.on{background:var(--brass);color:#000;font-weight:600}
+
+  .legend{padding:0 16px 13px;display:flex;gap:16px;flex-wrap:wrap;font-family:var(--f-mono);font-size:9.5px;color:var(--faint);line-height:1.6}
+  .legend b{color:var(--muted);font-weight:500}
+
+  /* detail */
+  .detail{margin-top:18px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);overflow:hidden}
+  .dhead{padding:13px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .dtitle{font-size:14.5px;font-weight:600}.dtitle small{display:block;font-family:var(--f-mono);font-size:10px;color:var(--brass);font-weight:400;margin-top:2px}
+  .dbadges{display:flex;gap:8px}
+  .vb{font-family:var(--f-mono);font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:4px 9px;border-radius:6px}
+  .vb.b-pass{background:var(--passbg);border:1px solid #4ade9e40}.vb.b-fail{background:var(--failbg);border:1px solid #ff6b6b40}.vb.b-cant{background:var(--cantbg);border:1px solid var(--line)}
+  .vb.p-preserved{background:var(--passbg);border:1px solid #4ade9e40}.vb.p-violated{background:#ffb45418;border:1px solid #ffb45444}.vb.p-unverifiable{background:var(--cantbg);border:1px solid var(--line)}
+  .dbody{padding:18px;display:grid;gap:16px}
+  @media(min-width:720px){.dbody{grid-template-columns:1fr 1fr}}
+  .block h4{font-family:var(--f-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:0 0 7px}
+  .block p{margin:0;font-size:13px;line-height:1.6}.block p.dim{color:var(--muted)}
+  .etype{font-family:var(--f-mono);font-size:11px;color:var(--paper);background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px;line-height:1.7;white-space:pre-wrap}
+  .etype .kk{color:var(--brass)}
+  .distinct{grid-column:1/-1;border-top:1px solid var(--line2);padding-top:14px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .distinct .txt{font-family:var(--f-serif);font-size:14px;max-width:64ch}.distinct .txt b{color:var(--brass);font-family:var(--f-disp);font-weight:600}
+  .recbtn{display:inline-flex;align-items:center;gap:8px;background:var(--brass);color:#000;border:0;border-radius:8px;padding:9px 14px;font:600 13px var(--f-disp);cursor:pointer;white-space:nowrap}.recbtn:disabled{opacity:.55}
+  .recout{grid-column:1/-1;font-family:var(--f-mono);font-size:11.5px;color:var(--muted);min-height:16px}.recout .ok{color:var(--pass)}.recout .bad{color:var(--fail)}
+  .spin{display:inline-block;width:11px;height:11px;border:2px solid #0004;border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  /* semantic linker */
+  .linker{margin-top:18px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);overflow:hidden}
+  .lk-body{padding:18px;display:grid;gap:16px}
+  @media(min-width:820px){.lk-body{grid-template-columns:1fr 1fr}}
+  .lk-controls{display:flex;flex-direction:column;gap:12px}
+  .lk-row label{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:5px}
+  .lk-row select{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:9px;color:var(--paper);padding:10px 11px;font:12px var(--f-mono)}
+  .lk-row select:focus{outline:none;border-color:var(--brass)}
+  .lk-check{background:var(--brass);color:#000;border:0;border-radius:9px;padding:11px;font:600 13px var(--f-disp);cursor:pointer}
+  .lk-out{border:1px solid var(--line);border-radius:11px;background:var(--ink);padding:14px;font-family:var(--f-mono);font-size:12px;line-height:1.7;min-height:120px}
+  .lk-out .valid{color:var(--pass);font-weight:600}.lk-out .err{color:var(--fail);font-weight:700}
+  .lk-out .cx{color:var(--muted);margin-top:8px;display:block;border-top:1px solid var(--line2);padding-top:8px}
+  .lk-out .arrow{color:var(--brass)}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .presets button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:7px;padding:5px 9px;font:11px var(--f-mono);cursor:pointer}
+  .presets button:hover{border-color:var(--brass);color:var(--brass)}
+
+  footer{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);font-family:var(--f-mono);font-size:10.5px;color:var(--faint);line-height:1.9}
+  footer b{color:var(--muted);font-weight:500}
+  @media(prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+
+<div class="ribbon">Interactive demo · ETHOnline 2026 · reference data — the runner is real: trustless-ai/semantic-abi (node runner/demo.mjs)</div>
+<div class="wrap">
+
+  <header class="cover">
+    <div class="coverrow">
+      <div class="brand">
+        <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
+          <polygon points="0,0 100,0 50,50" fill="#E0A24C"/><polygon points="100,0 100,100 50,50" fill="#A15E1E"/>
+          <polygon points="0,100 100,100 50,50" fill="#4a2b12"/><polygon points="0,0 0,100 50,50" fill="#C8823a"/>
+          <circle cx="50" cy="50" r="4" fill="#0C0D11"/>
+        </svg>
+        <div><b>Semantic ABI</b><span>for composing Ethereum verification</span></div>
+      </div>
+      <div class="event"><b>ETHOnline 2026</b> Â· from-scratch track <span style="color:var(--faint)">Â· [logo]</span></div>
+    </div>
+    <h1>Ethereum type-checks bytes. This type-checks <em>meaning</em>.</h1>
+    <p class="lede">
+      A commitment, an attestation, a state proof and an independent recomputation can each return <b>true</b> and
+      still carry completely different authority. This is an executable type system for what one protocol's evidence
+      is <b>allowed to mean</b> when another consumes it â so a composition can't silently upgrade what it proves.
+    </p>
+    <div class="pipe">
+      <span class="p">semantic manifests</span><span class="ar">â</span>
+      <span class="p">typed relation graph</span><span class="ar">â</span>
+      <span class="p hot">semantic linker</span><span class="ar">â</span>
+      <span class="p">live / replay adapters</span><span class="ar">â</span>
+      <span class="p">protected-relation eval</span><span class="ar">â</span>
+      <span class="p">witness / counterexample</span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- agent -->
+    <div class="card">
+      <div class="h"><span class="t">Genesis Agent Â· action chat</span><span class="mono" style="font-size:9.5px;color:var(--pass)">â live</span></div>
+      <div class="agent">
+        <div class="aid"><div class="avatar"></div><div>
+          <div class="nm">Frequencinarino</div><div class="sub">frequencinarino.dinamic.eth</div>
+          <div class="id">agent 0x8b5Aâ¦A2C3 Â· GenesisAgentRegistry</div></div></div>
+        <div class="pq">
+          <div class="ph"><svg class="lk" viewBox="0 0 24 24" fill="none" stroke="#7FD1FF" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Post-quantum bound Â· ERC-8373</div>
+          <div class="pqfam"><span class="fam"><b>ML-DSA-65</b> Â· Dilithium</span><span class="fam"><b>SLH-DSA</b> Â· SPHINCS+</span></div>
+          <div class="pqmeta">binding anchored <span class="g">mainnet</span> Â· key never leaves client<br>each action carries a PQ <b>companion signature</b></div>
+          <button class="pqverify" onclick="pqVerify()">â» Verify PQ binding in browser</button>
+          <div id="pqout"></div>
+        </div>
+        <div class="chat">
+          <div class="msgs" id="msgs"><div class="msg a">Drive me â every reply emits typed evidence: an <b>Evidence&lt;â¦&gt;</b> receipt the linker and the relation-runner can consume.</div></div>
+          <div class="composer"><input id="prompt" placeholder="ask the agentâ¦" onkeydown="if(event.key==='Enter')runAction()"><button id="sendBtn" onclick="runAction()">Run â¶</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- surface -->
+    <div class="card">
+      <div class="h"><span class="t">Protected-relation runner Â· 2 levels, kept separate</span></div>
+      <div class="subject">
+        <span class="lab">Subject</span><span class="rid" id="subjId">Evidence&lt;â¦&gt; <b>â</b></span>
+        <span class="spacer"></span>
+        <label class="tw"><input type="checkbox" id="twin" onchange="render()"> feed tampered evidence</label>
+      </div>
+      <div class="matrixwrap"><table><thead><tr>
+        <th class="relhdr">Protected relation</th>
+        <th class="syshdr"><div class="nm">invinoveritas</div><div class="who">@babyblueviper1</div></th>
+        <th class="syshdr"><div class="nm">VÃ©rtice gw</div><div class="who">@TMerlini</div></th>
+        <!-- horizon-shield (Toshikatsu) deferred to post-ETHOnline â returns as a 3rd independent target after the event -->
+      </tr></thead><tbody id="mbody"></tbody></table></div>
+      <div class="barstats">
+        <div class="stat"><span class="n" id="statPair">â</span><span class="l">pairs Â· preserved / violated / unverifiable</span></div>
+        <div class="stat"><span class="n" id="statBackend">â</span><span class="l">backends Â· pass / fail / cannot-check</span></div>
+        <span class="badge2"><span class="d"></span> no shared checker Â· 2 repos (horizon-shield post-event)</span>
+        <div class="vtoggle"><span class="cap">invino C1</span>
+          <div class="seg" role="group" aria-label="invinoveritas source">
+            <button id="preBtn" onclick="setVer('pre')">replay Â· pinned</button>
+            <button id="postBtn" class="on" onclick="setVer('post')">live Â· post-v18</button>
+          </div></div>
+      </div>
+      <div class="legend">
+        <span><b>backend</b> = did the system do its job? PASS / FAIL / CANNOT_CHECK</span>
+        <span><b>pair</b> = what the evidence pair did? PRESERVED / VIOLATED / UNVERIFIABLE</span>
+        <span>tampered input â pair VIOLATED, but a correct backend still <b>PASSes</b> (it caught it). FAIL = a real distinction collapsed.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail" id="detail" hidden></div>
+
+  <!-- semantic linker -->
+  <div class="linker">
+    <div class="h" style="padding:12px 16px;border-bottom:1px solid var(--line)"><span class="t" style="font-family:var(--f-mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint)">Where this goes next Â· Semantic ABI â the Ethereum-scale close (concept, not the weekend build)</span></div>
+    <div class="lk-body">
+      <div class="lk-controls">
+        <div class="lk-row"><label>Producer establishes</label>
+          <select id="prod">
+            <option value="ONCHAIN_COMMITMENT">OnchainCommitment&lt;Digest&gt;</option>
+            <option value="INFRA_ATTESTATION">InfrastructureAttestation&lt;Action&gt;</option>
+            <option value="STATE_INCLUSION">StateInclusion&lt;Value&gt;</option>
+            <option value="CONSENSUS_HEADER">ConsensusValidatedHeader</option>
+            <option value="INDEPENDENT_RECOMPUTE">IndependentRecomputation&lt;Action&gt;</option>
+            <option value="SEMANTIC_VERIFICATION">SemanticVerification&lt;Claim&gt;</option>
+          </select></div>
+        <div class="lk-row"><label>Consumer requires</label>
+          <select id="cons">
+            <option value="SEMANTIC_VERIFICATION">SemanticVerification&lt;Claim&gt;</option>
+            <option value="ONCHAIN_COMMITMENT">OnchainCommitment&lt;Digest&gt;</option>
+            <option value="CONSENSUS_HEADER">ConsensusValidatedHeader</option>
+            <option value="INFRA_ATTESTATION">InfrastructureAttestation&lt;Action&gt;</option>
+            <option value="STATE_INCLUSION">StateInclusion&lt;Value&gt;</option>
+          </select></div>
+        <button class="lk-check" onclick="link()">Type-check composition â¶</button>
+        <div class="presets">
+          <button onclick="preset('ONCHAIN_COMMITMENT','SEMANTIC_VERIFICATION')">anchored â verified?</button>
+          <button onclick="preset('STATE_INCLUSION','CONSENSUS_HEADER')">proof â header authority?</button>
+          <button onclick="preset('INDEPENDENT_RECOMPUTE','SEMANTIC_VERIFICATION')">recompute â verified?</button>
+        </div>
+      </div>
+      <div class="lk-out" id="lkout"><span class="dim" style="color:var(--faint)">Pick a producer and a consumer, or a preset â the linker checks whether the edge exists, or emits a meaning-level <b>type error</b> + counterexample.</span></div>
+    </div>
+  </div>
+
+  <footer>
+    <b>The demo in three cases:</b> a signed-commitment collapse (invino, historical replay â fixed &amp; live-reverified),
+    an authority-separation case (VÃ©rtice, independent), and proof-vs-header-authority. Behind them: one generic semantic graph.<br>
+    Mock for the ETHOnline team Â· VÃ©rtice Criativo &amp; trustless-ai Â· <b>Don't trust. Recompute.</b>
+  </footer>
+</div>
+
+<script>
+/* ---- protected relations (Pavlo's three cases) ---- */
+const CASES = [
+  { id:"c1", name:"Signed decision commitment", pair:["reject / evidence-against","reject / insufficient"],
+    etype:"Evidence<\n  claim_type:      DecisionCommitment\n  authority_class: SIGNED_VERDICT\n  scope:           per-review\n  as_of:           anchored block\n>",
+    fixture:"A verdict with no evidence either way â honest answer is âinsufficientâ, never ârefutedâ. Checked at the SIGNED commitment layer, not just the response.",
+    reason_pass:"Distinct reason survives into the signed commitment â a verifier reading only the signature still sees two answers.",
+    reason_fail:"The two reasons were collapsed into one signed reject. Reproduced from pinned pre-v18 evidence â the real historical incident, replayed, not a live backend." },
+  { id:"c2", name:"Authority separation", pair:["infrastructure-attestation authority","on-chain commitment authority"],
+    etype:"Evidence<\n  claim_type:      Action\n  authority_class: INFRA_ATTESTATION\n  scope:           per-action\n  as_of:           run time\n>",
+    fixture:"Both native checks return success â an infra attestation AND an on-chain commitment. But they establish different authority; treating one as the other is an upgrade.",
+    reason_pass:"The two authority classes are kept typed and separate; neither is silently promoted into the other.",
+    reason_fail:"Authority classes merged â an infra attestation was read as on-chain commitment authority." },
+  { id:"c3", name:"Proof vs header authority", pair:["state-inclusion proof","consensus-validated header"],
+    etype:"Evidence<\n  claim_type:      StateInclusion\n  authority_class: MERKLE_PROOF / root\n  scope:           value @ root\n  as_of:           supplied header\n>",
+    fixture:"A valid MPT proof against a SUPPLIED state root. It proves inclusion under that root â it does NOT establish the header carrying the root is canonical / consensus-validated.",
+    reason_pass:"Inclusion-under-root and header-canonicity stay separate; a valid proof does not upgrade an RPC-sourced header into independently-validated authority.",
+    reason_fail:"A valid MPT proof silently upgraded an RPC-sourced header into consensus-validated authority." },
+];
+const SYS=[["invino","invinoveritas"],["vertice","VÃ©rtice gw"]]; // horizon-shield deferred to post-ETHOnline
+// base backend grade per system/case for CLEAN input. 'ver' only affects invino/c1.
+const BASE = {
+  invino:{ c1:{pre:"fail",post:"pass"}, c2:"pass", c3:"pass" },
+  vertice:{ c1:"pass", c2:"pass", c3:"pass" },
+};
+let ver="post", tampered=false, sel=null, receiptN=0, deriving=false;
+const BLAB={pass:"PASS",fail:"FAIL",cant:"CANNOT_CHECK"};
+
+function backendOf(sys,cid){ const v=BASE[sys][cid]; return (typeof v==="object")?v[ver]:v; }
+function cellState(sys,cid){
+  const backend = backendOf(sys,cid);
+  if(backend==="cant") return {backend:"cant", pair:"unverifiable", detected:false};
+  if(backend==="fail") return {backend:"fail", pair:"violated", detected:false}; // real collapse (pre-v18 replay)
+  // backend passes on clean input
+  if(tampered) return {backend:"pass", pair:"violated", detected:true};          // caught the tampering â still PASS
+  return {backend:"pass", pair:"preserved", detected:false};
+}
+
+let receipt={id:"â"};
+function newReceipt(){ receiptN++; const hex=n=>Array.from({length:n},(_,i)=>"0123456789abcdef"[(receiptN*7+i*13)%16]).join(""); return {id:"0x"+hex(4)+"â¦"+hex(4)}; }
+
+function render(){
+  tampered=document.getElementById("twin").checked;
+  const tb=document.getElementById("mbody"); tb.innerHTML="";
+  const tally={pass:0,fail:0,cant:0,preserved:0,violated:0,unverifiable:0};
+  for(const c of CASES){
+    const tr=document.createElement("tr");
+    const rc=document.createElement("td"); rc.className="relcell";
+    rc.innerHTML=`<div class="rn">${c.name}</div><div class="rp">${c.pair[0]} <span class="neq">â </span> ${c.pair[1]}</div>`;
+    tr.appendChild(rc);
+    for(const [sid] of SYS){
+      const s=deriving?null:cellState(sid,c.id);
+      const td=document.createElement("td"); td.className="cell";
+      if(s){ tally[s.backend]++; tally[s.pair]++; }
+      const isSel=sel&&sel.sys===sid&&sel.rel===c.id;
+      if(deriving){
+        td.innerHTML=`<button class="chip"><span class="lvl"><span class="dot" style="background:var(--brass);animation:sp .7s linear infinite"></span><span class="k">â¦</span></span></button>`;
+      } else {
+        const pairLab = s.pair==="violated"?(s.detected?"VIOLATED Â· detected":"VIOLATED"):s.pair.toUpperCase();
+        const pairDot = s.pair==="preserved"?"var(--pass)":s.pair==="violated"?"var(--viol)":"var(--cant)";
+        const pairBg = s.pair==="preserved"?"var(--passbg)":s.pair==="violated"?"#ffb45414":"var(--cantbg)";
+        // Pair outcome is the PRIMARY state (Pavlo): big colored badge; backend is a small secondary badge.
+        td.innerHTML=`<button class="chip ${isSel?'sel':''}" style="background:${pairBg}" onclick="pick('${sid}','${c.id}')">
+          <span class="lvl"><span class="dot" style="background:${pairDot};box-shadow:0 0 7px ${pairDot}"></span><span class="badge p-${s.pair}" style="font-size:12px;font-weight:700">${pairLab}</span></span>
+          <span class="lvl" style="opacity:.7"><span class="dot" style="opacity:0"></span><span class="k">backend</span><span class="badge b-${s.backend}" style="font-size:10px">${BLAB[s.backend]}</span></span>
+        </button>`;
+      }
+      tr.appendChild(td);
+    }
+    tb.appendChild(tr);
+  }
+  if(deriving){
+    document.getElementById("statPair").innerHTML="<b>â¦</b>";
+    document.getElementById("statBackend").innerHTML="<b>â¦</b>";
+  } else {
+    document.getElementById("statPair").innerHTML=`<b class="p-preserved">${tally.preserved}</b> / <b class="p-violated">${tally.violated}</b> / <b class="p-unverifiable">${tally.unverifiable}</b>`;
+    document.getElementById("statBackend").innerHTML=`<b class="b-pass">${tally.pass}</b> / <b class="b-fail">${tally.fail}</b> / <b class="b-cant">${tally.cant}</b>`;
+  }
+  document.getElementById("subjId").innerHTML=`Evidence&lt;â¦&gt; <b>${receipt.id}</b>`;
+  if(sel) renderDetail();
+}
+
+function runAction(){
+  if(deriving)return;
+  const inp=document.getElementById("prompt"), q=(inp.value||"summarise this contract").trim(); inp.value="";
+  const msgs=document.getElementById("msgs");
+  msgs.insertAdjacentHTML("beforeend",`<div class="msg u">${esc(q)}</div>`);
+  receipt=newReceipt();
+  msgs.insertAdjacentHTML("beforeend",`<div class="msg a">Done â result signed (L4) + PQ companion, typed as Evidence&lt;â¦&gt;.<span class="rc">${receipt.id} Â· Base Sepolia</span></div>`);
+  msgs.scrollTop=msgs.scrollHeight;
+  deriving=true; render(); document.getElementById("sendBtn").disabled=true;
+  setTimeout(()=>{deriving=false;document.getElementById("sendBtn").disabled=false;render();},1000);
+}
+function pqVerify(){ const out=document.getElementById("pqout"); out.textContent="";
+  const L=["fetch binding anchor (ERC-8373, mainnet) â¦ ok","check owner authorization â¦ ok","verify ML-DSA-65 + SLH-DSA companion â¦ ok",`<span class="g">binding recomputed â dual-family, non-custodial â</span>`];
+  let i=0; const t=()=>{out.innerHTML=L.slice(0,i+1).map(l=>"âº "+l).join("<br>"); if(++i<L.length)setTimeout(t,440);}; setTimeout(t,180); }
+
+function pick(sys,cid){ if(deriving)return; sel={sys,rel:cid}; render(); renderDetail(); document.getElementById("detail").scrollIntoView({behavior:"smooth",block:"nearest"}); }
+function renderDetail(){
+  const d=document.getElementById("detail"), c=CASES.find(x=>x.id===sel.rel), s=cellState(sel.sys,sel.rel), sysName=SYS.find(x=>x[0]===sel.sys)[1];
+  const pend=s.backend==="cant", fail=s.backend==="fail";
+  let txt = pend?`Not yet wired â <b>${sysName}</b> isn't onboarded for this relation. Backend <b>CANNOT_CHECK</b>, pair <b>UNVERIFIABLE</b> â honest, never a silent pass.`
+    : fail?`${c.reason_fail} <b>Backend FAIL</b> â the distinction collapsed. This is the counterexample the runner emits.`
+    : s.detected?`Tampered input â the evidence pair is <b>VIOLATED</b>, and the backend correctly <b>caught it â PASS</b>. Two different questions: âwhat did this input do?â vs âdid the system do its job?â`
+    : c.reason_pass;
+  const pairLab = s.pair==="violated"?(s.detected?"VIOLATED Â· detected":"VIOLATED"):s.pair.toUpperCase();
+  d.hidden=false;
+  d.innerHTML=`<div class="dhead"><div class="dtitle">${c.name}<small>${sysName}${sel.sys==="invino"&&sel.rel==="c1"?(" Â· "+(ver==="pre"?"replay Â· pinned pre-v18":"live Â· post-v18")):""}</small></div>
+    <div class="dbadges"><span class="vb b-${s.backend}">backend ${BLAB[s.backend]}</span><span class="vb p-${s.pair}">pair ${pairLab}</span></div></div>
+    <div class="dbody">
+      <div class="block"><h4>The evidence type</h4><div class="etype">${c.etype.replace(/(\w+):/g,'<span class="kk">$1</span>:')}</div></div>
+      <div class="block"><h4>The fixture â a case that should read apart</h4><p class="dim">${c.fixture}</p></div>
+      <div class="distinct"><div class="txt">${txt}</div>${pend?"":`<button class="recbtn" id="recbtn" onclick="recompute()">â» Recompute witness</button>`}</div>
+      <div class="recout" id="recout"></div>
+    </div>`;
+}
+function recompute(){
+  const btn=document.getElementById("recbtn"), out=document.getElementById("recout"), s=cellState(sel.sys,sel.rel);
+  btn.disabled=true; btn.innerHTML=`<span class="spin"></span> re-derivingâ¦`; out.textContent="";
+  const L = s.backend==="fail"
+    ? ["load pinned historical evidence â¦ ok","re-derive both readings â¦ ok",`compare â <span class="bad">COLLAPSED at signed layer</span>`,`witness matches oracle: <span class="ok">backend FAIL â</span> â minimal counterexample emitted`]
+    : s.detected
+    ? ["ingest tampered Evidence<â¦> â¦ ok","re-derive pair â¦ <span class='bad'>VIOLATED</span>","backend response â¦ flagged the violation",`witness matches oracle: <span class="ok">backend PASS â</span> â detected, not collapsed`]
+    : ["fetch signed commitment â¦ ok","re-derive both readings from source â¦ ok","compare â two typed values preserved",`witness matches oracle: <span class="ok">backend PASS Â· pair PRESERVED â</span>`];
+  let i=0; const t=()=>{out.innerHTML=L.slice(0,i+1).map(l=>"âº "+l).join("<br>"); if(++i<L.length)setTimeout(t,480); else{btn.disabled=false;btn.innerHTML="â» Recompute again";}}; setTimeout(t,320);
+}
+function setVer(v){ ver=v; document.getElementById("preBtn").classList.toggle("on",v==="pre"); document.getElementById("postBtn").classList.toggle("on",v==="post"); render(); }
+
+/* ---- semantic linker ---- */
+const ESTABLISHES = {
+  ONCHAIN_COMMITMENT:["ONCHAIN_COMMITMENT"],
+  INFRA_ATTESTATION:["INFRA_ATTESTATION"],
+  STATE_INCLUSION:["STATE_INCLUSION"],
+  CONSENSUS_HEADER:["CONSENSUS_HEADER"],
+  INDEPENDENT_RECOMPUTE:["INDEPENDENT_RECOMPUTE","SEMANTIC_VERIFICATION"],
+  SEMANTIC_VERIFICATION:["SEMANTIC_VERIFICATION"],
+};
+const NICE = {ONCHAIN_COMMITMENT:"OnchainCommitment<Digest>",INFRA_ATTESTATION:"InfrastructureAttestation<Action>",STATE_INCLUSION:"StateInclusion<Value>",CONSENSUS_HEADER:"ConsensusValidatedHeader",INDEPENDENT_RECOMPUTE:"IndependentRecomputation<Action>",SEMANTIC_VERIFICATION:"SemanticVerification<Claim>"};
+const CX = {
+  "ONCHAIN_COMMITMENT|SEMANTIC_VERIFICATION":"a digest anchored on-chain says only âthese bytes were committedâ. It never evaluated the claim. Consuming it as SemanticVerification upgrades a commitment into a verified meaning with zero evidence.",
+  "STATE_INCLUSION|CONSENSUS_HEADER":"a valid MPT proof shows a value is included under a SUPPLIED root. The root's header could be any RPC's word. Consuming it as ConsensusValidatedHeader upgrades an unvalidated header into consensus authority.",
+  "INFRA_ATTESTATION|ONCHAIN_COMMITMENT":"an infrastructure attestation is signed by a service. Consuming it as an on-chain commitment upgrades a trusted-service claim into settlement authority it never had.",
+};
+function link(){
+  const p=document.getElementById("prod").value, c=document.getElementById("cons").value, out=document.getElementById("lkout");
+  const ok = ESTABLISHES[p] && ESTABLISHES[p].includes(c);
+  if(ok){
+    out.innerHTML=`producer establishes <span style="color:var(--brass)">${NICE[p]}</span><br>consumer requires <span style="color:var(--brass)">${NICE[c]}</span><br><br><span class="valid">â valid semantic edge</span> â authority satisfied. Composition is well-typed; no upgrade.`;
+  } else {
+    const cx = CX[p+"|"+c] || `${NICE[p]} does not establish ${NICE[c]} â composing them would upgrade authority with no evidence.`;
+    out.innerHTML=`producer establishes <span style="color:var(--brass)">${NICE[p]}</span><br>consumer requires <span style="color:var(--brass)">${NICE[c]}</span><br>no semantic edge <span class="arrow">${p} â ${c}</span><br><br><span class="err">â TYPE ERROR</span> â silent authority upgrade blocked.<span class="cx">counterexample: ${cx}</span>`;
+  }
+}
+function preset(p,c){ document.getElementById("prod").value=p; document.getElementById("cons").value=c; link(); }
+function esc(s){return s.replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]));}
+render(); preset("ONCHAIN_COMMITMENT","SEMANTIC_VERIFICATION");
+</script>
