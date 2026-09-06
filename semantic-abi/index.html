@@ -201,7 +201,7 @@
         <div class="pq">
           <div class="ph"><svg class="lk" viewBox="0 0 24 24" fill="none" stroke="#5560CF" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Post-quantum bound · ERC-8373</div>
           <div class="pqfam"><span class="fam"><b>ML-DSA-65</b> · Dilithium</span><span class="fam" style="opacity:.6">pq_key_binding.v0</span></div>
-          <div class="pqmeta">owner-authorized ML-DSA-65 delegate · <span class="g">secp256k1 owner sig ✓</span><br>binding recomputable · anchoring pending next batch (Base Sepolia)<br><span style="opacity:.65">per-action companion signing — roadmap (Phase 3)</span></div>
+          <div class="pqmeta">owner-authorized ML-DSA-65 delegate · <span class="g">secp256k1 owner sig ✓</span><br>binding recomputable · <span class="g">anchored · Base Sepolia (epoch 4)</span><br><span style="opacity:.65">per-action companion signing — roadmap (Phase 3)</span></div>
           <button class="pqverify" onclick="pqVerify()">↻ Verify PQ binding in browser</button>
           <div id="pqout"></div>
         </div>
@@ -380,7 +380,7 @@ function runAction(){
   setTimeout(()=>{deriving=false;document.getElementById("sendBtn").disabled=false;render();},1000);
 }
 function pqVerify(){ const out=document.getElementById("pqout"); out.textContent="";
-  const L=["fetch binding · pq_key_binding.v0 … ok","recompute cc = sha256(JCS(statement)) → 98f970d3… ✓","recover owner secp256k1 sig → 0xFf9a…ca14 == owner ✓","ML-DSA-65 delegate authorized · epoch 0 in force ✓",`<span class="g">binding recomputed — owner-authorized, anchoring pending ✓</span>`];
+  const L=["fetch binding · pq_key_binding.v0 … ok","recompute cc = sha256(JCS(statement)) → 98f970d3… ✓","recover owner secp256k1 sig → 0xFf9a…ca14 == owner ✓","fold Merkle leaf → epoch-4 root a187b133… ✓ (Base Sepolia)",`<span class="g">binding recomputed — owner-authorized + anchored ✓</span>`];
   let i=0; const t=()=>{out.innerHTML=L.slice(0,i+1).map(l=>"› "+l).join("<br>"); if(++i<L.length)setTimeout(t,440);}; setTimeout(t,180); }
 
 function pick(sys,cid){ if(deriving)return; sel={sys,rel:cid}; render(); renderDetail(); document.getElementById("detail").scrollIntoView({behavior:"smooth",block:"nearest"}); }
