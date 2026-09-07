@@ -418,6 +418,7 @@
             <option value="CONSENSUS_HEADER">ConsensusValidatedHeader</option>
             <option value="INDEPENDENT_RECOMPUTE">IndependentRecomputation&lt;Action&gt;</option>
             <option value="SEMANTIC_VERIFICATION">SemanticVerification&lt;Claim&gt;</option>
+            <option value="RELATIVE_SLIPPAGE_OK">SwapWithinSlippage&lt;latest quote&gt;</option>
           </select></div>
         <div class="lk-row"><label>Another system wants to rely on</label>
           <select id="cons">
@@ -426,12 +427,14 @@
             <option value="CONSENSUS_HEADER">ConsensusValidatedHeader</option>
             <option value="INFRA_ATTESTATION">InfrastructureAttestation&lt;Action&gt;</option>
             <option value="STATE_INCLUSION">StateInclusion&lt;Value&gt;</option>
+            <option value="USER_MINIMUM_SATISFIED">UserMinimumHonoured&lt;declared&gt;</option>
           </select></div>
         <button class="lk-check" onclick="link()">Check it <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-1px"><path d="M8 5v14l11-7z"/></svg></button>
         <div class="presets">
           <button onclick="preset('ONCHAIN_COMMITMENT','SEMANTIC_VERIFICATION')">anchored → verified?</button>
           <button onclick="preset('STATE_INCLUSION','CONSENSUS_HEADER')">proof → header authority?</button>
           <button onclick="preset('INDEPENDENT_RECOMPUTE','SEMANTIC_VERIFICATION')">recompute → verified?</button>
+          <button onclick="preset('RELATIVE_SLIPPAGE_OK','USER_MINIMUM_SATISFIED')">slippage ok → minimum honoured? (1inch)</button>
         </div>
       </div>
       <div class="lk-out" id="lkout"><span class="dim" style="color:var(--faint)">Pick what one system proves and what another wants to rely on (or try a preset). It answers whether that's a fair use of the evidence, or shows you exactly why it isn't.</span></div>
@@ -600,13 +603,16 @@ const ESTABLISHES = {
   CONSENSUS_HEADER:["CONSENSUS_HEADER"],
   INDEPENDENT_RECOMPUTE:["INDEPENDENT_RECOMPUTE"],
   SEMANTIC_VERIFICATION:["SEMANTIC_VERIFICATION"],
+  RELATIVE_SLIPPAGE_OK:["RELATIVE_SLIPPAGE_OK"],
+  USER_MINIMUM_SATISFIED:["USER_MINIMUM_SATISFIED"],
 };
-const NICE = {ONCHAIN_COMMITMENT:"OnchainCommitment<Digest>",INFRA_ATTESTATION:"InfrastructureAttestation<Action>",STATE_INCLUSION:"StateInclusion<Value>",CONSENSUS_HEADER:"ConsensusValidatedHeader",INDEPENDENT_RECOMPUTE:"IndependentRecomputation<Action>",SEMANTIC_VERIFICATION:"SemanticVerification<Claim>"};
+const NICE = {ONCHAIN_COMMITMENT:"OnchainCommitment<Digest>",INFRA_ATTESTATION:"InfrastructureAttestation<Action>",STATE_INCLUSION:"StateInclusion<Value>",CONSENSUS_HEADER:"ConsensusValidatedHeader",INDEPENDENT_RECOMPUTE:"IndependentRecomputation<Action>",SEMANTIC_VERIFICATION:"SemanticVerification<Claim>",RELATIVE_SLIPPAGE_OK:"SwapWithinSlippage<latest quote>",USER_MINIMUM_SATISFIED:"UserMinimumHonoured<declared>"};
 const CX = {
   "INDEPENDENT_RECOMPUTE|SEMANTIC_VERIFICATION":"recomputation re-derives the value from public bytes, it does not judge the claim. recompute → semantic-verification is valid ONLY within a matching claim_type + scope + temporal boundary (PR #1 removed the global edge); authority class alone never carries it. Composing them by authority is the exact over-claim this tool catches.",
   "ONCHAIN_COMMITMENT|SEMANTIC_VERIFICATION":"a digest anchored on-chain says only 'these bytes were committed'. It never evaluated the claim. Consuming it as SemanticVerification upgrades a commitment into a verified meaning with zero evidence.",
   "STATE_INCLUSION|CONSENSUS_HEADER":"a valid MPT proof shows a value is included under a SUPPLIED root. The root's header could be any RPC's word. Consuming it as ConsensusValidatedHeader upgrades an unvalidated header into consensus authority.",
   "INFRA_ATTESTATION|ONCHAIN_COMMITMENT":"an infrastructure attestation is signed by a service. Consuming it as an on-chain commitment upgrades a trusted-service claim into settlement authority it never had.",
+  "RELATIVE_SLIPPAGE_OK|USER_MINIMUM_SATISFIED":"a 1% slippage check passes against the LATEST swap quote — but that's a relative guarantee. On a requote (100 → 80) it would settle at 79.2, below the user's declared absolute minimum of 90. 'slippage ok' silently stands in for 'the user's minimum was honoured' — the exact over-claim this catches (example numbers; recompute a real 1inch quote in adapters/oneinch).",
 };
 function link(){
   const p=document.getElementById("prod").value, c=document.getElementById("cons").value, out=document.getElementById("lkout");
