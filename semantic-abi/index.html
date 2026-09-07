@@ -169,8 +169,8 @@
   @media(prefers-reduced-motion:reduce){.spin{animation:none}}
 
   /* --- sequenced reveal layer (presentation only; gated by .seq which JS adds) --- */
-  #leftcol{display:flex;flex-direction:column;gap:14px;min-width:0}
-  #rightcol{min-width:0}
+  #leftcol{display:flex;flex-direction:column;gap:14px;min-width:0;perspective:1300px}
+  #rightcol{min-width:0;perspective:1300px}
   .drivebar{text-align:center}
   .drivebtn{display:inline-flex;align-items:center;gap:9px;background:transparent;color:var(--acc);border:1.5px solid var(--acc);border-radius:999px;padding:12px 26px;font:600 15px var(--f-disp);cursor:pointer;transition:.18s}
   .drivebtn:hover{background:var(--acc);color:#fff;box-shadow:0 8px 22px -8px #2e63d980}
@@ -192,10 +192,51 @@
   @media(max-width:640px){.steps{grid-template-columns:1fr}}
   .seqnarr{display:none;font-family:var(--f-mono);font-size:11.5px;color:var(--acc);margin:14px 0 0}
   .wrap.seq .seqnarr{display:block}
-  .wrap.seq #runnerCard{opacity:0;transform:translateX(38px);transition:opacity .5s ease,transform .55s cubic-bezier(.2,.75,.25,1)}
-  .wrap.seq #runnerCard.in{opacity:1;transform:none}
+  .wrap.seq #runnerCard{opacity:0;transform:translateX(38px) rotateY(-5deg);transition:opacity .5s ease,transform .55s cubic-bezier(.2,.75,.25,1)}
+  .wrap.seq #runnerCard.in{opacity:1;transform:rotateY(-5deg)}
   .wrap.seq #linkerWrap{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease}
   .wrap.seq #linkerWrap.in{opacity:1;transform:none}
+
+  /* --- prototype card fidelity: dark 3D agent card (faces right) --- */
+  #leftcol > .card{transform-style:preserve-3d;transform:rotateX(2deg) rotateY(7deg);
+    background:radial-gradient(120% 130% at 12% 8%,#2a325a,#161a2e 60%);
+    border:1px solid #ffffff1f;box-shadow:0 30px 50px -24px #16305f80;color:#eef1ff}
+  #leftcol > .card > .h{border-bottom-color:#ffffff1a}
+  #leftcol > .card > .h .t{color:#aec7ff}
+  #leftcol .aid .nm{color:#fff}
+  #leftcol .aid .sub{color:var(--peri)}
+  #leftcol .aid .id{color:#ffffff7a}
+  #leftcol .pq{border-color:#ffffff2a;background:#ffffff0d}
+  #leftcol .pq .ph{color:#c9d2ff}
+  #leftcol .fam{border-color:#ffffff26;background:#ffffff12;color:#dfe6ff}
+  #leftcol .fam b{color:#fff}
+  #leftcol .pqmeta{color:#c3cbe6}
+  #leftcol .pqmeta .g{color:#9fe6c4}
+  #leftcol .pqverify{background:#ffffff12;color:#dfe6ff;border-color:#ffffff33}
+  #leftcol .pqverify:hover{background:#ffffff1f}
+  #leftcol #pqout{color:#aab4d4}
+  #leftcol #pqout .g{color:#9fe6c4}
+  #leftcol .chat{border-top-color:#ffffff1f}
+  #leftcol .msg.u{background:#ffffff14;border-color:#ffffff26;color:#eef1ff}
+  #leftcol .msg.a{background:#2e63d63b;border-color:#2e63d977;color:#eef4ff}
+  #leftcol .msg .rc{color:var(--peri);border-top-color:#ffffff1f}
+  #leftcol .composer input{background:#ffffff0f;border-color:#ffffff2e;color:#fff}
+  #leftcol .composer input::placeholder{color:#ffffff66}
+
+  /* --- prototype card fidelity: blue runner card (faces slightly left) --- */
+  #runnerCard{transform:rotateY(-5deg);transform-origin:right center;
+    background:linear-gradient(140deg,#eef3ff,#dbe8ff);border-color:#2e63d433;
+    box-shadow:0 26px 46px -24px #2e63d966}
+  #runnerCard > .h{border-bottom-color:#2e63d422}
+  #runnerCard > .h .t{color:var(--accdim)}
+  #runnerCard .subject{background:#ffffff66;border-bottom-color:#2e63d422}
+  #runnerCard .barstats{border-top-color:#2e63d422}
+  #runnerCard .legend{color:#5f6b8a}
+  #runnerCard .relcell,#runnerCard .cell{border-top-color:#2e63d418}
+
+  /* tilts are desktop-only — flatten on narrow screens to avoid overlap */
+  @media(max-width:900px){ #leftcol > .card,#runnerCard{transform:none}
+    .wrap.seq #runnerCard{transform:translateX(24px)} .wrap.seq #runnerCard.in{transform:none} }
 </style>
 
 <div class="ribbon">Interactive demo · ETHOnline 2026 · reference data, the runner is real: trustless-ai/semantic-abi (node runner/demo.mjs)</div>
