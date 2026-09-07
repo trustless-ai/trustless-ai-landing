@@ -167,6 +167,114 @@
   footer b{color:var(--muted);font-weight:500}
   footer a{color:var(--acc)}
   @media(prefers-reduced-motion:reduce){.spin{animation:none}}
+
+  /* --- sequenced reveal layer (presentation only; gated by .seq which JS adds) --- */
+  #leftcol{display:flex;flex-direction:column;gap:14px;min-width:0;perspective:1300px}
+  #rightcol{min-width:0;perspective:1300px}
+  .drivebar{text-align:center}
+  .drivebtn{display:inline-flex;align-items:center;gap:9px;background:transparent;color:var(--acc);border:1.5px solid var(--acc);border-radius:999px;padding:12px 26px;font:600 15px var(--f-disp);cursor:pointer;transition:.18s}
+  .drivebtn:hover{background:var(--acc);color:#fff;box-shadow:0 8px 22px -8px #2e63d980}
+  .replaybtn{margin-top:9px;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 16px;font:12px var(--f-mono);cursor:pointer}
+  .introcard{display:none;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 1px 2px #0f10170a;padding:16px 18px}
+  .introeyebrow{font-family:var(--f-mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--acc)}
+  .introh{font-family:var(--f-disp);font-size:15px;font-weight:600;margin:5px 0 6px}
+  .introdesc{font-size:13px;color:var(--muted);line-height:1.55;margin:0 0 14px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .step{border:1px solid var(--line2);border-radius:12px;padding:12px;background:#fafbff;display:flex;flex-direction:column}
+  .step.enf{background:var(--violbg);border-color:#b8730a22}
+  .stnum{font-family:var(--f-mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)}
+  .step.enf .stnum{color:var(--viol)}
+  .stt{font-family:var(--f-disp);font-size:13px;font-weight:600;margin:2px 0 9px}
+  .stic{height:44px;margin-bottom:9px;display:flex;align-items:center;justify-content:center}
+  .stic svg{width:100%;max-width:116px;height:44px}
+  .stcap{font-size:11px;color:var(--muted);line-height:1.45}
+  .stcap code{font-family:var(--f-mono);font-size:10px;color:var(--acc);background:var(--accsoft);padding:1px 4px;border-radius:4px}
+  @media(max-width:640px){.steps{grid-template-columns:1fr}}
+  .seqnarr{display:none;font-family:var(--f-mono);font-size:11.5px;color:var(--acc);margin:14px 0 0}
+  .wrap.seq .seqnarr{display:block}
+  .wrap.seq #runnerCard{opacity:0;transform:translateX(38px) rotateY(-5deg);transition:opacity .5s ease,transform .55s cubic-bezier(.2,.75,.25,1)}
+  .wrap.seq #runnerCard.in{opacity:1;transform:rotateY(-5deg)}
+  .wrap.seq #linkerWrap{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease}
+  .wrap.seq #linkerWrap.in{opacity:1;transform:none}
+
+  /* --- prototype card fidelity: dark 3D agent card (faces right) --- */
+  #leftcol > .card{transform-style:preserve-3d;transform:rotateX(2deg) rotateY(7deg);
+    background:radial-gradient(120% 130% at 12% 8%,#2a325a,#161a2e 60%);
+    border:1px solid #ffffff1f;box-shadow:0 30px 50px -24px #16305f80;color:#eef1ff}
+  #leftcol > .card > .h{border-bottom-color:#ffffff1a}
+  #leftcol > .card > .h .t{color:#aec7ff}
+  #leftcol .aid .nm{color:#fff}
+  #leftcol .aid .sub{color:var(--peri)}
+  #leftcol .aid .id{color:#ffffff7a}
+  #leftcol .pq{border-color:#ffffff2a;background:#ffffff0d}
+  #leftcol .pq .ph{color:#c9d2ff}
+  #leftcol .fam{border-color:#ffffff26;background:#ffffff12;color:#dfe6ff}
+  #leftcol .fam b{color:#fff}
+  #leftcol .pqmeta{color:#c3cbe6}
+  #leftcol .pqmeta .g{color:#9fe6c4}
+  #leftcol .pqverify{background:#ffffff12;color:#dfe6ff;border-color:#ffffff33}
+  #leftcol .pqverify:hover{background:#ffffff1f}
+  #leftcol #pqout{color:#aab4d4}
+  #leftcol #pqout .g{color:#9fe6c4}
+  #leftcol .chat{border-top-color:#ffffff1f}
+  #leftcol .msg.u{background:#ffffff14;border-color:#ffffff26;color:#eef1ff}
+  #leftcol .msg.a{background:#2e63d63b;border-color:#2e63d977;color:#eef4ff}
+  #leftcol .msg .rc{color:var(--peri);border-top-color:#ffffff1f}
+  #leftcol .composer input{background:#ffffff0f;border-color:#ffffff2e;color:#fff}
+  #leftcol .composer input::placeholder{color:#ffffff66}
+
+  /* --- prototype card fidelity: blue runner card (faces slightly left) --- */
+  #runnerCard{transform:rotateY(-5deg);transform-origin:right center;
+    background:linear-gradient(140deg,#eef3ff,#dbe8ff);border-color:#2e63d433;
+    box-shadow:0 26px 46px -24px #2e63d966}
+  #runnerCard > .h{border-bottom-color:#2e63d422}
+  #runnerCard > .h .t{color:var(--accdim)}
+  #runnerCard .subject{background:#ffffff66;border-bottom-color:#2e63d422}
+  #runnerCard .barstats{border-top-color:#2e63d422}
+  #runnerCard .legend{color:#5f6b8a}
+  #runnerCard .relcell,#runnerCard .cell{border-top-color:#2e63d418}
+
+  /* tilts are desktop-only, flatten on narrow screens to avoid overlap */
+  @media(max-width:900px){ #leftcol > .card,#runnerCard{transform:none}
+    .wrap.seq #runnerCard{transform:translateX(24px)} .wrap.seq #runnerCard.in{transform:none} }
+
+  /* discreet chat scrollbar on the dark agent card */
+  #leftcol .msgs{scrollbar-width:thin;scrollbar-color:#ffffff33 transparent}
+  #leftcol .msgs::-webkit-scrollbar{width:8px}
+  #leftcol .msgs::-webkit-scrollbar-track{background:transparent}
+  #leftcol .msgs::-webkit-scrollbar-thumb{background:#ffffff2e;border-radius:8px}
+  #leftcol .msgs::-webkit-scrollbar-thumb:hover{background:#ffffff4a}
+  /* running: fields stay, a small round loader shows + matrix dims */
+  .miniloader{display:inline-block;width:12px;height:12px;border:2px solid #2e63d440;border-top-color:var(--acc);border-radius:50%;animation:sp .6s linear infinite;flex:none}
+  .miniloader[hidden]{display:none}
+  #runnerCard.running .matrixwrap{opacity:.5;transition:opacity .2s}
+  @media(prefers-reduced-motion:reduce){.miniloader{animation:none}}
+
+  /* tampered-evidence visual (what actually changed) */
+  .tamperviz{margin:0 16px 6px;border:1px solid var(--fail);background:var(--failbg);border-radius:10px;padding:10px 12px;font-family:var(--f-mono);font-size:10.5px;line-height:1.65;color:var(--muted)}
+  .tamperviz[hidden]{display:none}
+  .tamperviz .tvh{color:var(--fail);font-weight:600;margin-bottom:5px}
+  .tamperviz .rel{color:var(--ink)}
+  .tamperviz .neq{color:var(--acc)}
+  .tamperviz .old{color:var(--fail);text-decoration:line-through;opacity:.8}
+  .tamperviz .new{color:var(--fail);font-weight:600}
+  .tamperviz .note{margin-top:5px}
+  .tamperviz .ok{color:var(--pass);font-weight:600}
+
+  /* source / endpoint links so a judge can check the relations */
+  .srclink{font-family:var(--f-mono);font-size:9px;color:var(--acc);text-decoration:none;border-bottom:1px dotted currentColor;white-space:nowrap}
+  .srclink:hover{border-bottom-style:solid}
+  .syshdr .srclink{display:inline-block;margin-top:3px;font-weight:400}
+
+  /* verifiable anchor link (subject + chat receipt) */
+  .txlink{color:var(--acc);text-decoration:none;border-bottom:1px dotted currentColor;white-space:nowrap}
+  .txlink:hover{border-bottom-style:solid}
+  #leftcol .txlink{color:var(--peri)}
+
+  /* stat pills in the runner barstats */
+  .barstats .stat{display:inline-flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px}
+  .barstats .stat .n{font-size:13px}
+  #runnerCard .barstats .stat{background:#ffffffcc;border-color:#2e63d42e;box-shadow:0 1px 2px #2e63d914}
 </style>
 
 <div class="ribbon">Interactive demo · ETHOnline 2026 · reference data, the runner is real: trustless-ai/semantic-abi (node runner/demo.mjs)</div>
@@ -204,7 +312,10 @@
     <p class="plugtext">Plug in with a small adapter, declare what your evidence may prove, and the zero-dependency runner checks the composition. No rip-and-replace, and every system that joins strengthens the standard. <b>It doesn't replace your stack. It becomes the spine between its parts.</b></p>
   </section>
 
+  <p class="seqnarr" id="seqnarr">Meet the agent, then drive it, the runner and the proof reveal in sequence.</p>
+
   <div class="grid">
+    <div id="leftcol">
 
     <!-- agent -->
     <div class="card">
@@ -222,23 +333,54 @@
         </div>
         <div class="chat">
           <div class="msgs" id="msgs"><div class="msg a">Drive me, every reply emits typed evidence: an <b>Evidence&lt;…&gt;</b> receipt the linker and the relation-runner can consume.</div></div>
-          <div class="composer"><input id="prompt" placeholder="ask the agent…" onkeydown="if(event.key==='Enter')runAction()"><button id="sendBtn" onclick="runAction()">Run <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-1px"><path d="M8 5v14l11-7z"/></svg></button></div>
+          <div class="composer"><input id="prompt" placeholder="ask the agent…" onkeydown="if(event.key==='Enter')driveAll()"><button id="sendBtn" onclick="driveAll()">Run <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-1px"><path d="M8 5v14l11-7z"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drivebar">
+      <button class="drivebtn" onclick="driveAll()">Drive the agent <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-1px"><path d="M8 5v14l11-7z"/></svg></button>
+      <div><button class="replaybtn" id="replaybtn" onclick="resetSeq()" hidden>↺ replay</button></div>
+    </div>
+    </div><!-- /leftcol -->
+
+    <div id="rightcol">
+    <div class="introcard" id="introCard">
+      <div class="introeyebrow">the agent driving this</div>
+      <h3 class="introh">Trustless Pioneer, securing its past and its future</h3>
+      <p class="introdesc">A pre-action runner: before it acts it commits what it is about to do, and its identity is bound to a post-quantum key anchored in time on-chain, so its record can't be forged forward or backward. Drive it, and two independent systems check that record against one standard.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="stnum">1 · publish</div><div class="stt">Declare the key</div>
+          <div class="stic"><svg viewBox="0 0 120 46" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="20" cy="23" r="12"/><circle cx="20" cy="23" r="3.4" fill="var(--acc)" stroke="none"/><path d="M32 23 H92 M78 23 V33 M92 23 V31"/></svg></div>
+          <div class="stcap">The agent's post-quantum key is published as <code>pq_pubkey</code>.</div>
+        </div>
+        <div class="step">
+          <div class="stnum">2 · anchor</div><div class="stt">Stamp it in time</div>
+          <div class="stic"><svg viewBox="0 0 120 46" fill="none" stroke="var(--acc)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="34" x2="112" y2="34" stroke="var(--peri)" stroke-width="2"/><line x1="34" y1="30" x2="34" y2="38"/><line x1="86" y1="30" x2="86" y2="38"/><circle cx="60" cy="9" r="4"/><path d="M60 13 V37"/><path d="M46 20 H74"/><path d="M42 26 c0 10 8 15 18 15 c10 0 18 -5 18 -15"/></svg></div>
+          <div class="stcap">Its hash is stamped on Ethereum. Hashes are quantum-safe, so the anchor is a provable, unforgeable time of existence.</div>
+        </div>
+        <div class="step enf">
+          <div class="stnum">3 · enforce</div><div class="stt">Draw a cutoff</div>
+          <div class="stic"><svg viewBox="0 0 120 46" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" y1="32" x2="110" y2="32" stroke="var(--peri)" stroke-width="2"/><path d="M103 28 L110 32 L103 36" stroke="var(--peri)" stroke-width="2"/><line x1="70" y1="12" x2="70" y2="42" stroke="var(--viol)" stroke-width="3"/><line x1="61" y1="13" x2="79" y2="13" stroke="var(--viol)" stroke-width="3"/><line x1="98" y1="22" x2="78" y2="22" stroke="var(--viol)" stroke-width="2" stroke-dasharray="3 3"/><path d="M82 18 L76 22 L82 26" stroke="var(--viol)" stroke-width="2"/></svg></div>
+          <div class="stcap">A strict cutoff <b>T</b> a retroactive forger cannot cross, no back-dating the record.</div>
         </div>
       </div>
     </div>
 
     <!-- surface -->
-    <div class="card">
-      <div class="h"><span class="t">Protected-relation runner · 2 levels, kept separate</span></div>
+    <div class="card" id="runnerCard">
+      <div class="h"><span class="t">Protected-relation runner · 2 levels, kept separate · <a class="srclink" href="https://github.com/trustless-ai/semantic-abi/blob/main/runner/demo.mjs" target="_blank" rel="noopener">check it: node runner/demo.mjs ↗</a></span><span class="miniloader" id="runload" hidden></span></div>
       <div class="subject">
         <span class="lab">Subject</span><span class="rid" id="subjId">Evidence&lt;…&gt; <b>, </b></span>
         <span class="spacer"></span>
         <label class="tw"><input type="checkbox" id="twin" onchange="render()"> feed tampered evidence</label>
       </div>
+      <div class="tamperviz" id="tamperViz" hidden></div>
       <div class="matrixwrap"><table><thead><tr>
         <th class="relhdr">Protected relation</th>
-        <th class="syshdr"><div class="nm">invinoveritas</div><div class="who">@babyblueviper1</div></th>
-        <th class="syshdr"><div class="nm">Vértice gw</div><div class="who">@TMerlini</div></th>
+        <th class="syshdr"><div class="nm">invinoveritas</div><div class="who">@babyblueviper1</div><a class="srclink" href="https://github.com/trustless-ai/semantic-abi/tree/main/adapters/invinoveritas" target="_blank" rel="noopener">adapter + vectors ↗</a></th>
+        <th class="syshdr"><div class="nm">Vértice gw</div><div class="who">@TMerlini</div><a class="srclink" href="https://github.com/trustless-ai/semantic-abi/tree/main/adapters/vertice" target="_blank" rel="noopener">adapter + vectors ↗</a></th>
         <!-- horizon-shield (Toshikatsu) deferred to post-ETHOnline, returns as a 3rd independent target after the event -->
       </tr></thead><tbody id="mbody"></tbody></table></div>
       <div class="barstats">
@@ -257,12 +399,13 @@
         <span>tampered input → expected VIOLATED; a correct backend observes VIOLATED and <b>conforms (PASS)</b>. FAIL = expected VIOLATED but observed PRESERVED, the distinction collapsed.</span>
       </div>
     </div>
+    </div><!-- /rightcol -->
   </div>
 
   <div class="detail" id="detail" hidden></div>
 
   <!-- semantic linker -->
-  <div class="linker">
+  <div class="linker" id="linkerWrap">
     <div class="h" style="padding:12px 16px;border-bottom:1px solid var(--line)"><span class="t" style="font-family:var(--f-mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint)">Can one system's proof be used by another? · checked live by the real runner</span></div>
     <div class="lk-body">
       <div class="lk-controls">
@@ -327,6 +470,9 @@ const BASE = {
   vertice:{ c1:"pass", c2:"pass", c3:"pass" },
 };
 let ver="post", tampered=false, sel=null, receiptN=0, deriving=false;
+/* real, verifiable anchor for this agent's PQ binding (epoch 4, Base Sepolia / chain 84532), same root pqVerify() recomputes */
+const ANCHOR_TX="0x3a3bc56fcd75ded5e480d8000f9cfb3dc5d61d3743a1c1488a1d260fb625fa1a";
+const ANCHOR_URL="https://sepolia.basescan.org/tx/"+ANCHOR_TX;
 const BLAB={pass:"PASS",fail:"FAIL",cant:"CANNOT_CHECK"};
 
 function backendOf(sys,cid){ const v=BASE[sys][cid]; return (typeof v==="object")?v[ver]:v; }
@@ -355,19 +501,20 @@ function render(){
     rc.innerHTML=`<div class="rn">${c.name}</div><div class="rp">${c.pair[0]} <span class="neq">≠</span> ${c.pair[1]}</div>`;
     tr.appendChild(rc);
     for(const [sid] of SYS){
-      const s=deriving?null:cellState(sid,c.id);
+      const s=cellState(sid,c.id);
       const td=document.createElement("td"); td.className="cell";
       if(s){ tally[s.conformance]++; tally[s.observed]++; }
       const isSel=sel&&sel.sys===sid&&sel.rel===c.id;
-      if(deriving){
-        td.innerHTML=`<button class="chip"><span class="lvl"><span class="dot" style="background:var(--acc);animation:sp .7s linear infinite"></span><span class="k">…</span></span></button>`;
-      } else {
-        // Conformance (did the backend match the oracle?) is the primary verdict; expected → observed is shown so a collapse (expected ≠ observed) is legible.
-        const confDot = s.conformance==="pass"?"var(--pass)":s.conformance==="fail"?"var(--fail)":"var(--cant)";
-        const confBg  = s.conformance==="pass"?"var(--passbg)":s.conformance==="fail"?"var(--failbg)":"var(--cantbg)";
+      {
         const clr = o => o==="preserved"?"var(--pass)":o==="violated"?"var(--viol)":"var(--cant)";
-        td.innerHTML=`<button class="chip ${isSel?'sel':''}" style="background:${confBg}" onclick="pick('${sid}','${c.id}')">
-          <span class="lvl"><span class="dot" style="background:${confDot}"></span><span class="badge b-${s.conformance}" style="font-size:12px;font-weight:700">${CLAB[s.conformance]}</span>${s.detected?'<span class="mono" style="font-size:9px;color:var(--faint)">· caught</span>':''}</span>
+        const isViol = s.observed==="violated";
+        // tile colour tracks the evidence verdict, so a caught tamper reads amber (violated, but flagged), not a plain green PASS
+        const tileBg = s.conformance==="fail"?"var(--failbg)":isViol?"var(--violbg)":s.conformance==="pass"?"var(--passbg)":"var(--cantbg)";
+        const head = s.detected
+          ? `<span class="dot" style="background:var(--viol)"></span><span class="badge" style="color:var(--viol);font-size:12px;font-weight:700">VIOLATED</span><span class="mono" style="font-size:9px;color:var(--pass)">· caught &#10003; (check PASS)</span>`
+          : `<span class="dot" style="background:${s.conformance==="pass"?"var(--pass)":s.conformance==="fail"?"var(--fail)":"var(--cant)"}"></span><span class="badge b-${s.conformance}" style="font-size:12px;font-weight:700">${CLAB[s.conformance]}</span>`;
+        td.innerHTML=`<button class="chip ${isSel?'sel':''}" style="background:${tileBg}" onclick="pick('${sid}','${c.id}')">
+          <span class="lvl">${head}</span>
           <span class="lvl" style="opacity:.85"><span class="dot" style="opacity:0"></span><span class="k">pair</span><span class="mono" style="font-size:9.5px">exp <b style="color:${clr(s.expected)}">${s.expected.toUpperCase()}</b> → obs <b style="color:${clr(s.observed)}">${s.observed.toUpperCase()}</b></span></span>
         </button>`;
       }
@@ -375,14 +522,24 @@ function render(){
     }
     tb.appendChild(tr);
   }
-  if(deriving){
-    document.getElementById("statPair").innerHTML="<b>…</b>";
-    document.getElementById("statBackend").innerHTML="<b>…</b>";
-  } else {
+  {
     document.getElementById("statPair").innerHTML=`<b class="p-preserved">${tally.preserved}</b> / <b class="p-violated">${tally.violated}</b> / <b class="p-unverifiable">${tally.unverifiable}</b>`;
     document.getElementById("statBackend").innerHTML=`<b class="b-pass">${tally.pass}</b> / <b class="b-fail">${tally.fail}</b> / <b class="b-cant">${tally.cant}</b>`;
   }
-  document.getElementById("subjId").innerHTML=`Evidence&lt;…&gt; <b>${receipt.id}</b>`;
+  document.getElementById("subjId").innerHTML=`Evidence&lt;…&gt; <b>${receipt.id}</b> <span style="color:var(--faint)">· reference receipt ·</span> <a class="txlink" href="${ANCHOR_URL}" target="_blank" rel="noopener">agent PQ-binding anchor: Base Sepolia · epoch 4 ↗</a>`;
+  const tv=document.getElementById("tamperViz");
+  if(tampered){
+    const c=CASES.find(x=>x.id===(sel&&sel.rel))||CASES[0];
+    const before=(receipt.id&&receipt.id.replace(/\s|,/g,""))?receipt.id:"0x52fc…52fc";
+    const after=before.replace(/[0-9a-f](?=[^0-9a-f]*$)/i,ch=>"0123456789abcdef"[(parseInt(ch,16)+7)%16]);
+    tv.hidden=false;
+    tv.innerHTML=`<div class="tvh">⚠ tampered evidence, one field of the signed payload was overwritten so the two values that must stay distinct are forced equal</div>
+      <div class="rel">protected relation:&nbsp; ${c.pair[0]} <span class="neq">≠</span> ${c.pair[1]}</div>
+      <div>tampered input:&nbsp; <span class="old">${c.pair[1]}</span> → <span class="new">${c.pair[0]}</span> &nbsp;(distinction violated)</div>
+      <div>Evidence digest:&nbsp; <span class="old">${before}</span> → <span class="new">${after}</span> &nbsp;(byte flip changes the hash)</div>
+      <div class="note">expected now <b>VIOLATED</b>. A conforming backend observes VIOLATED and flags it, <span class="ok">PASS · caught</span>. A backend that collapsed the distinction would still report PRESERVED, <b>FAIL</b>.</div>
+      <div class="note">so the pills below read: observed-pair <b style="color:var(--viol)">${tally.violated} VIOLATED</b>, conformance <b class="ok">${tally.pass} PASS</b>. Conformance PASS means the check <b>worked</b> (it caught the tamper), not that the evidence is clean, which is why it stays green.</div>`;
+  } else { tv.hidden=true; }
   if(sel) renderDetail();
 }
 
@@ -392,10 +549,13 @@ function runAction(){
   const msgs=document.getElementById("msgs");
   msgs.insertAdjacentHTML("beforeend",`<div class="msg u">${esc(q)}</div>`);
   receipt=newReceipt();
-  msgs.insertAdjacentHTML("beforeend",`<div class="msg a">Done, result signed (L4), typed as Evidence&lt;…&gt;.<span class="rc">${receipt.id} · Base Sepolia</span></div>`);
+  msgs.insertAdjacentHTML("beforeend",`<div class="msg a">Done. Reference receipt, typed as Evidence&lt;…&gt;.<span class="rc">receipt ${receipt.id}<br>agent PQ-binding anchor: <a class="txlink" href="${ANCHOR_URL}" target="_blank" rel="noopener">Base Sepolia · epoch 4 ↗</a></span></div>`);
   msgs.scrollTop=msgs.scrollHeight;
   deriving=true; render(); document.getElementById("sendBtn").disabled=true;
-  setTimeout(()=>{deriving=false;document.getElementById("sendBtn").disabled=false;render();},1000);
+  const rc=document.getElementById("runnerCard"), rl=document.getElementById("runload");
+  if(rc) rc.classList.add("running"); if(rl) rl.hidden=false;
+  setTimeout(()=>{deriving=false;document.getElementById("sendBtn").disabled=false;render();
+    if(rc) rc.classList.remove("running"); if(rl) rl.hidden=true;},1000);
 }
 function pqVerify(){ const out=document.getElementById("pqout"); out.textContent="";
   const L=["fetch binding · pq_key_binding.v0 … ok","recompute cc = sha256(JCS(statement)) → 98f970d3… ✓","recover owner secp256k1 sig → 0xFf9a…ca14 == owner ✓","fold Merkle leaf → epoch-4 root a187b133… ✓ (Base Sepolia)",`<span class="g">binding recomputed, owner-authorized + anchored ✓</span>`];
@@ -459,5 +619,35 @@ function link(){
 }
 function preset(p,c){ document.getElementById("prod").value=p; document.getElementById("cons").value=c; link(); }
 function esc(s){return s.replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]));}
-render(); preset("ONCHAIN_COMMITMENT","SEMANTIC_VERIFICATION");
+
+/* ---- sequenced reveal (presentation only; the functional DOM above is untouched) ---- */
+const seqReduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+function seqInit(){
+  if(seqReduce) return;                                   // reduced-motion: leave the full functional page visible
+  const w=document.querySelector(".wrap"); w.classList.add("seq");
+  const intro=document.getElementById("introCard"); if(intro) intro.style.display="block";
+  document.getElementById("runnerCard").style.display="none";
+  document.getElementById("linkerWrap").style.display="none";
+}
+function seqReveal(el,cls){ if(!el) return; el.style.display=""; void el.offsetWidth; el.classList.add(cls); }
+function driveAll(){
+  runAction();                                            // real: new receipt + matrix re-render
+  const w=document.querySelector(".wrap");
+  if(!w.classList.contains("seq") || w.classList.contains("driven")) return; // no-js/reduced or already revealed
+  w.classList.add("driven");
+  const intro=document.getElementById("introCard"); if(intro) intro.style.display="none";
+  seqReveal(document.getElementById("runnerCard"),"in");
+  setTimeout(()=>seqReveal(document.getElementById("linkerWrap"),"in"), 650);
+  const rb=document.getElementById("replaybtn"); if(rb) rb.hidden=false;
+}
+function resetSeq(){
+  const w=document.querySelector(".wrap"); w.classList.remove("driven");
+  const rc=document.getElementById("runnerCard"); rc.classList.remove("in"); rc.style.display="none";
+  const lw=document.getElementById("linkerWrap"); lw.classList.remove("in"); lw.style.display="none";
+  const intro=document.getElementById("introCard"); if(intro) intro.style.display="block";
+  document.getElementById("detail").hidden=true; sel=null;
+  const rb=document.getElementById("replaybtn"); if(rb) rb.hidden=true;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+render(); preset("ONCHAIN_COMMITMENT","SEMANTIC_VERIFICATION"); seqInit();
 </script>
