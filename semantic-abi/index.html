@@ -261,6 +261,11 @@
   .tamperviz .note{margin-top:5px}
   .tamperviz .ok{color:var(--pass);font-weight:600}
 
+  /* source / endpoint links so a judge can check the relations */
+  .srclink{font-family:var(--f-mono);font-size:9px;color:var(--acc);text-decoration:none;border-bottom:1px dotted currentColor;white-space:nowrap}
+  .srclink:hover{border-bottom-style:solid}
+  .syshdr .srclink{display:inline-block;margin-top:3px;font-weight:400}
+
   /* verifiable anchor link (subject + chat receipt) */
   .txlink{color:var(--acc);text-decoration:none;border-bottom:1px dotted currentColor;white-space:nowrap}
   .txlink:hover{border-bottom-style:solid}
@@ -365,7 +370,7 @@
 
     <!-- surface -->
     <div class="card" id="runnerCard">
-      <div class="h"><span class="t">Protected-relation runner · 2 levels, kept separate</span><span class="miniloader" id="runload" hidden></span></div>
+      <div class="h"><span class="t">Protected-relation runner · 2 levels, kept separate · <a class="srclink" href="https://github.com/trustless-ai/semantic-abi/blob/main/runner/demo.mjs" target="_blank" rel="noopener">check it: node runner/demo.mjs ↗</a></span><span class="miniloader" id="runload" hidden></span></div>
       <div class="subject">
         <span class="lab">Subject</span><span class="rid" id="subjId">Evidence&lt;…&gt; <b>, </b></span>
         <span class="spacer"></span>
@@ -374,8 +379,8 @@
       <div class="tamperviz" id="tamperViz" hidden></div>
       <div class="matrixwrap"><table><thead><tr>
         <th class="relhdr">Protected relation</th>
-        <th class="syshdr"><div class="nm">invinoveritas</div><div class="who">@babyblueviper1</div></th>
-        <th class="syshdr"><div class="nm">Vértice gw</div><div class="who">@TMerlini</div></th>
+        <th class="syshdr"><div class="nm">invinoveritas</div><div class="who">@babyblueviper1</div><a class="srclink" href="https://github.com/trustless-ai/semantic-abi/tree/main/adapters/invinoveritas" target="_blank" rel="noopener">adapter + vectors ↗</a></th>
+        <th class="syshdr"><div class="nm">Vértice gw</div><div class="who">@TMerlini</div><a class="srclink" href="https://github.com/trustless-ai/semantic-abi/tree/main/adapters/vertice" target="_blank" rel="noopener">adapter ↗</a></th>
         <!-- horizon-shield (Toshikatsu) deferred to post-ETHOnline, returns as a 3rd independent target after the event -->
       </tr></thead><tbody id="mbody"></tbody></table></div>
       <div class="barstats">
