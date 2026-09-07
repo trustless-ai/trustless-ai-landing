@@ -612,7 +612,7 @@ const CX = {
   "ONCHAIN_COMMITMENT|SEMANTIC_VERIFICATION":"a digest anchored on-chain says only 'these bytes were committed'. It never evaluated the claim. Consuming it as SemanticVerification upgrades a commitment into a verified meaning with zero evidence.",
   "STATE_INCLUSION|CONSENSUS_HEADER":"a valid MPT proof shows a value is included under a SUPPLIED root. The root's header could be any RPC's word. Consuming it as ConsensusValidatedHeader upgrades an unvalidated header into consensus authority.",
   "INFRA_ATTESTATION|ONCHAIN_COMMITMENT":"an infrastructure attestation is signed by a service. Consuming it as an on-chain commitment upgrades a trusted-service claim into settlement authority it never had.",
-  "RELATIVE_SLIPPAGE_OK|USER_MINIMUM_SATISFIED":"a 1% slippage check passes against the LATEST swap quote — but that's a relative guarantee. On a requote (100 → 80) it would settle at 79.2, below the user's declared absolute minimum of 90. 'slippage ok' silently stands in for 'the user's minimum was honoured' — the exact over-claim this catches (example numbers; recompute a real 1inch quote in adapters/oneinch).",
+  "RELATIVE_SLIPPAGE_OK|USER_MINIMUM_SATISFIED":"a 1% slippage check passes against the LATEST swap quote, but that's a relative guarantee. On a requote (100 → 80) it would settle at 79.2, below the user's declared absolute minimum of 90. 'slippage ok' silently stands in for 'the user's minimum was honoured', the exact over-claim this catches (example numbers; recompute a real 1inch quote in adapters/oneinch).",
 };
 function link(){
   const p=document.getElementById("prod").value, c=document.getElementById("cons").value, out=document.getElementById("lkout");
