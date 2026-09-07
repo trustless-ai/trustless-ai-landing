@@ -250,6 +250,11 @@
   #runnerCard.running .matrixwrap{opacity:.5;transition:opacity .2s}
   @media(prefers-reduced-motion:reduce){.miniloader{animation:none}}
 
+  /* verifiable anchor link (subject + chat receipt) */
+  .txlink{color:var(--acc);text-decoration:none;border-bottom:1px dotted currentColor;white-space:nowrap}
+  .txlink:hover{border-bottom-style:solid}
+  #leftcol .txlink{color:var(--peri)}
+
   /* stat pills in the runner barstats */
   .barstats .stat{display:inline-flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px}
   .barstats .stat .n{font-size:13px}
@@ -448,6 +453,9 @@ const BASE = {
   vertice:{ c1:"pass", c2:"pass", c3:"pass" },
 };
 let ver="post", tampered=false, sel=null, receiptN=0, deriving=false;
+/* real, verifiable anchor for this agent's PQ binding (epoch 4, Base Sepolia / chain 84532) — same root pqVerify() recomputes */
+const ANCHOR_TX="0x3a3bc56fcd75ded5e480d8000f9cfb3dc5d61d3743a1c1488a1d260fb625fa1a";
+const ANCHOR_URL="https://sepolia.basescan.org/tx/"+ANCHOR_TX;
 const BLAB={pass:"PASS",fail:"FAIL",cant:"CANNOT_CHECK"};
 
 function backendOf(sys,cid){ const v=BASE[sys][cid]; return (typeof v==="object")?v[ver]:v; }
@@ -498,7 +506,7 @@ function render(){
     document.getElementById("statPair").innerHTML=`<b class="p-preserved">${tally.preserved}</b> / <b class="p-violated">${tally.violated}</b> / <b class="p-unverifiable">${tally.unverifiable}</b>`;
     document.getElementById("statBackend").innerHTML=`<b class="b-pass">${tally.pass}</b> / <b class="b-fail">${tally.fail}</b> / <b class="b-cant">${tally.cant}</b>`;
   }
-  document.getElementById("subjId").innerHTML=`Evidence&lt;…&gt; <b>${receipt.id}</b>`;
+  document.getElementById("subjId").innerHTML=`Evidence&lt;…&gt; <b>${receipt.id}</b> <a class="txlink" href="${ANCHOR_URL}" target="_blank" rel="noopener">binding anchored · epoch 4 · Base Sepolia ↗</a>`;
   if(sel) renderDetail();
 }
 
@@ -508,7 +516,7 @@ function runAction(){
   const msgs=document.getElementById("msgs");
   msgs.insertAdjacentHTML("beforeend",`<div class="msg u">${esc(q)}</div>`);
   receipt=newReceipt();
-  msgs.insertAdjacentHTML("beforeend",`<div class="msg a">Done, result signed (L4), typed as Evidence&lt;…&gt;.<span class="rc">${receipt.id} · Base Sepolia</span></div>`);
+  msgs.insertAdjacentHTML("beforeend",`<div class="msg a">Done, result signed (L4), typed as Evidence&lt;…&gt;.<span class="rc">${receipt.id} · <a class="txlink" href="${ANCHOR_URL}" target="_blank" rel="noopener">binding anchored · Base Sepolia ↗</a></span></div>`);
   msgs.scrollTop=msgs.scrollHeight;
   deriving=true; render(); document.getElementById("sendBtn").disabled=true;
   const rc=document.getElementById("runnerCard"), rl=document.getElementById("runload");
