@@ -250,6 +250,17 @@
   #runnerCard.running .matrixwrap{opacity:.5;transition:opacity .2s}
   @media(prefers-reduced-motion:reduce){.miniloader{animation:none}}
 
+  /* tampered-evidence visual (what actually changed) */
+  .tamperviz{margin:0 16px 6px;border:1px solid var(--fail);background:var(--failbg);border-radius:10px;padding:10px 12px;font-family:var(--f-mono);font-size:10.5px;line-height:1.65;color:var(--muted)}
+  .tamperviz[hidden]{display:none}
+  .tamperviz .tvh{color:var(--fail);font-weight:600;margin-bottom:5px}
+  .tamperviz .rel{color:var(--ink)}
+  .tamperviz .neq{color:var(--acc)}
+  .tamperviz .old{color:var(--fail);text-decoration:line-through;opacity:.8}
+  .tamperviz .new{color:var(--fail);font-weight:600}
+  .tamperviz .note{margin-top:5px}
+  .tamperviz .ok{color:var(--pass);font-weight:600}
+
   /* verifiable anchor link (subject + chat receipt) */
   .txlink{color:var(--acc);text-decoration:none;border-bottom:1px dotted currentColor;white-space:nowrap}
   .txlink:hover{border-bottom-style:solid}
@@ -360,6 +371,7 @@
         <span class="spacer"></span>
         <label class="tw"><input type="checkbox" id="twin" onchange="render()"> feed tampered evidence</label>
       </div>
+      <div class="tamperviz" id="tamperViz" hidden></div>
       <div class="matrixwrap"><table><thead><tr>
         <th class="relhdr">Protected relation</th>
         <th class="syshdr"><div class="nm">invinoveritas</div><div class="who">@babyblueviper1</div></th>
@@ -507,6 +519,18 @@ function render(){
     document.getElementById("statBackend").innerHTML=`<b class="b-pass">${tally.pass}</b> / <b class="b-fail">${tally.fail}</b> / <b class="b-cant">${tally.cant}</b>`;
   }
   document.getElementById("subjId").innerHTML=`Evidence&lt;…&gt; <b>${receipt.id}</b> <a class="txlink" href="${ANCHOR_URL}" target="_blank" rel="noopener">binding anchored · epoch 4 · Base Sepolia ↗</a>`;
+  const tv=document.getElementById("tamperViz");
+  if(tampered){
+    const c=CASES.find(x=>x.id===(sel&&sel.rel))||CASES[0];
+    const before=(receipt.id&&receipt.id.replace(/\s|,/g,""))?receipt.id:"0x52fc…52fc";
+    const after=before.replace(/[0-9a-f](?=[^0-9a-f]*$)/i,ch=>"0123456789abcdef"[(parseInt(ch,16)+7)%16]);
+    tv.hidden=false;
+    tv.innerHTML=`<div class="tvh">⚠ tampered evidence — one field of the signed payload was overwritten so the two values that must stay distinct are forced equal</div>
+      <div class="rel">protected relation:&nbsp; ${c.pair[0]} <span class="neq">≠</span> ${c.pair[1]}</div>
+      <div>tampered input:&nbsp; <span class="old">${c.pair[1]}</span> → <span class="new">${c.pair[0]}</span> &nbsp;(distinction violated)</div>
+      <div>Evidence digest:&nbsp; <span class="old">${before}</span> → <span class="new">${after}</span> &nbsp;(byte flip changes the hash)</div>
+      <div class="note">expected now <b>VIOLATED</b>. A conforming backend observes VIOLATED and flags it — <span class="ok">PASS · caught</span>. A backend that collapsed the distinction would still report PRESERVED — <b>FAIL</b>.</div>`;
+  } else { tv.hidden=true; }
   if(sel) renderDetail();
 }
 
