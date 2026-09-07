@@ -246,8 +246,14 @@
   #leftcol .msgs::-webkit-scrollbar-thumb:hover{background:#ffffff4a}
   /* running: fields stay, a small round loader shows + matrix dims */
   .miniloader{display:inline-block;width:12px;height:12px;border:2px solid #2e63d440;border-top-color:var(--acc);border-radius:50%;animation:sp .6s linear infinite;flex:none}
+  .miniloader[hidden]{display:none}
   #runnerCard.running .matrixwrap{opacity:.5;transition:opacity .2s}
   @media(prefers-reduced-motion:reduce){.miniloader{animation:none}}
+
+  /* stat pills in the runner barstats */
+  .barstats .stat{display:inline-flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px}
+  .barstats .stat .n{font-size:13px}
+  #runnerCard .barstats .stat{background:#ffffffcc;border-color:#2e63d42e;box-shadow:0 1px 2px #2e63d914}
 </style>
 
 <div class="ribbon">Interactive demo · ETHOnline 2026 · reference data, the runner is real: trustless-ai/semantic-abi (node runner/demo.mjs)</div>
