@@ -501,12 +501,15 @@ function render(){
       if(s){ tally[s.conformance]++; tally[s.observed]++; }
       const isSel=sel&&sel.sys===sid&&sel.rel===c.id;
       {
-        // Conformance (did the backend match the oracle?) is the primary verdict; expected → observed is shown so a collapse (expected ≠ observed) is legible.
-        const confDot = s.conformance==="pass"?"var(--pass)":s.conformance==="fail"?"var(--fail)":"var(--cant)";
-        const confBg  = s.conformance==="pass"?"var(--passbg)":s.conformance==="fail"?"var(--failbg)":"var(--cantbg)";
         const clr = o => o==="preserved"?"var(--pass)":o==="violated"?"var(--viol)":"var(--cant)";
-        td.innerHTML=`<button class="chip ${isSel?'sel':''}" style="background:${confBg}" onclick="pick('${sid}','${c.id}')">
-          <span class="lvl"><span class="dot" style="background:${confDot}"></span><span class="badge b-${s.conformance}" style="font-size:12px;font-weight:700">${CLAB[s.conformance]}</span>${s.detected?'<span class="mono" style="font-size:9px;color:var(--faint)">· caught</span>':''}</span>
+        const isViol = s.observed==="violated";
+        // tile colour tracks the evidence verdict, so a caught tamper reads amber (violated, but flagged), not a plain green PASS
+        const tileBg = s.conformance==="fail"?"var(--failbg)":isViol?"var(--violbg)":s.conformance==="pass"?"var(--passbg)":"var(--cantbg)";
+        const head = s.detected
+          ? `<span class="dot" style="background:var(--viol)"></span><span class="badge" style="color:var(--viol);font-size:12px;font-weight:700">VIOLATED</span><span class="mono" style="font-size:9px;color:var(--pass)">· caught &#10003; (check PASS)</span>`
+          : `<span class="dot" style="background:${s.conformance==="pass"?"var(--pass)":s.conformance==="fail"?"var(--fail)":"var(--cant)"}"></span><span class="badge b-${s.conformance}" style="font-size:12px;font-weight:700">${CLAB[s.conformance]}</span>`;
+        td.innerHTML=`<button class="chip ${isSel?'sel':''}" style="background:${tileBg}" onclick="pick('${sid}','${c.id}')">
+          <span class="lvl">${head}</span>
           <span class="lvl" style="opacity:.85"><span class="dot" style="opacity:0"></span><span class="k">pair</span><span class="mono" style="font-size:9.5px">exp <b style="color:${clr(s.expected)}">${s.expected.toUpperCase()}</b> → obs <b style="color:${clr(s.observed)}">${s.observed.toUpperCase()}</b></span></span>
         </button>`;
       }
