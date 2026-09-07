@@ -237,6 +237,17 @@
   /* tilts are desktop-only — flatten on narrow screens to avoid overlap */
   @media(max-width:900px){ #leftcol > .card,#runnerCard{transform:none}
     .wrap.seq #runnerCard{transform:translateX(24px)} .wrap.seq #runnerCard.in{transform:none} }
+
+  /* discreet chat scrollbar on the dark agent card */
+  #leftcol .msgs{scrollbar-width:thin;scrollbar-color:#ffffff33 transparent}
+  #leftcol .msgs::-webkit-scrollbar{width:8px}
+  #leftcol .msgs::-webkit-scrollbar-track{background:transparent}
+  #leftcol .msgs::-webkit-scrollbar-thumb{background:#ffffff2e;border-radius:8px}
+  #leftcol .msgs::-webkit-scrollbar-thumb:hover{background:#ffffff4a}
+  /* running: fields stay, a small round loader shows + matrix dims */
+  .miniloader{display:inline-block;width:12px;height:12px;border:2px solid #2e63d440;border-top-color:var(--acc);border-radius:50%;animation:sp .6s linear infinite;flex:none}
+  #runnerCard.running .matrixwrap{opacity:.5;transition:opacity .2s}
+  @media(prefers-reduced-motion:reduce){.miniloader{animation:none}}
 </style>
 
 <div class="ribbon">Interactive demo · ETHOnline 2026 · reference data, the runner is real: trustless-ai/semantic-abi (node runner/demo.mjs)</div>
@@ -332,7 +343,7 @@
 
     <!-- surface -->
     <div class="card" id="runnerCard">
-      <div class="h"><span class="t">Protected-relation runner · 2 levels, kept separate</span></div>
+      <div class="h"><span class="t">Protected-relation runner · 2 levels, kept separate</span><span class="miniloader" id="runload" hidden></span></div>
       <div class="subject">
         <span class="lab">Subject</span><span class="rid" id="subjId">Evidence&lt;…&gt; <b>, </b></span>
         <span class="spacer"></span>
@@ -459,13 +470,11 @@ function render(){
     rc.innerHTML=`<div class="rn">${c.name}</div><div class="rp">${c.pair[0]} <span class="neq">≠</span> ${c.pair[1]}</div>`;
     tr.appendChild(rc);
     for(const [sid] of SYS){
-      const s=deriving?null:cellState(sid,c.id);
+      const s=cellState(sid,c.id);
       const td=document.createElement("td"); td.className="cell";
       if(s){ tally[s.conformance]++; tally[s.observed]++; }
       const isSel=sel&&sel.sys===sid&&sel.rel===c.id;
-      if(deriving){
-        td.innerHTML=`<button class="chip"><span class="lvl"><span class="dot" style="background:var(--acc);animation:sp .7s linear infinite"></span><span class="k">…</span></span></button>`;
-      } else {
+      {
         // Conformance (did the backend match the oracle?) is the primary verdict; expected → observed is shown so a collapse (expected ≠ observed) is legible.
         const confDot = s.conformance==="pass"?"var(--pass)":s.conformance==="fail"?"var(--fail)":"var(--cant)";
         const confBg  = s.conformance==="pass"?"var(--passbg)":s.conformance==="fail"?"var(--failbg)":"var(--cantbg)";
@@ -479,10 +488,7 @@ function render(){
     }
     tb.appendChild(tr);
   }
-  if(deriving){
-    document.getElementById("statPair").innerHTML="<b>…</b>";
-    document.getElementById("statBackend").innerHTML="<b>…</b>";
-  } else {
+  {
     document.getElementById("statPair").innerHTML=`<b class="p-preserved">${tally.preserved}</b> / <b class="p-violated">${tally.violated}</b> / <b class="p-unverifiable">${tally.unverifiable}</b>`;
     document.getElementById("statBackend").innerHTML=`<b class="b-pass">${tally.pass}</b> / <b class="b-fail">${tally.fail}</b> / <b class="b-cant">${tally.cant}</b>`;
   }
@@ -499,7 +505,10 @@ function runAction(){
   msgs.insertAdjacentHTML("beforeend",`<div class="msg a">Done, result signed (L4), typed as Evidence&lt;…&gt;.<span class="rc">${receipt.id} · Base Sepolia</span></div>`);
   msgs.scrollTop=msgs.scrollHeight;
   deriving=true; render(); document.getElementById("sendBtn").disabled=true;
-  setTimeout(()=>{deriving=false;document.getElementById("sendBtn").disabled=false;render();},1000);
+  const rc=document.getElementById("runnerCard"), rl=document.getElementById("runload");
+  if(rc) rc.classList.add("running"); if(rl) rl.hidden=false;
+  setTimeout(()=>{deriving=false;document.getElementById("sendBtn").disabled=false;render();
+    if(rc) rc.classList.remove("running"); if(rl) rl.hidden=true;},1000);
 }
 function pqVerify(){ const out=document.getElementById("pqout"); out.textContent="";
   const L=["fetch binding · pq_key_binding.v0 … ok","recompute cc = sha256(JCS(statement)) → 98f970d3… ✓","recover owner secp256k1 sig → 0xFf9a…ca14 == owner ✓","fold Merkle leaf → epoch-4 root a187b133… ✓ (Base Sepolia)",`<span class="g">binding recomputed, owner-authorized + anchored ✓</span>`];
