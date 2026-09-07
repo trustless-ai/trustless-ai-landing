@@ -39,6 +39,8 @@
   h1{font-family:var(--f-disp);font-size:clamp(23px,4vw,36px);font-weight:600;letter-spacing:-.03em;margin:20px 0 8px;text-wrap:balance;max-width:22ch}
   h1 em{color:var(--acc);font-style:normal}
   .lede{font-size:16.5px;color:var(--muted);max-width:70ch;margin:6px 0 0}
+  .lede-tech{font-size:13px;color:var(--faint);margin-top:12px;border-top:1px solid var(--line);padding-top:11px;line-height:1.65}
+  .ledetag{font-family:var(--f-mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);border:1px solid var(--line);border-radius:5px;padding:2px 6px;margin-right:8px;vertical-align:1px}
   .lede b{color:var(--ink);font-weight:600}
 
   .pipe{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px;font-family:var(--f-mono);font-size:10.5px;color:var(--faint)}
@@ -176,10 +178,13 @@
     </div>
     <h1>Ethereum type-checks bytes. This type-checks <em>meaning</em>.</h1>
     <p class="lede">
-      A commitment, an attestation, a state proof and an independent recomputation can each return <b>true</b> and
-      still carry completely different authority. This is an executable type system for what one protocol's evidence
-      is <b>allowed to mean</b> when another consumes it — so a composition can't silently upgrade what it proves.
+      Software constantly trusts other software's "proof" — and routinely lets a weak one stand in for a strong one.
+      That silent upgrade is the root of many <b>"it was verified"</b> failures: drained bridges, fake attestations,
+      agents acting on claims nobody actually confirmed. Semantic ABI reads what each piece of evidence is
+      <b>allowed</b> to prove and flags the mismatch — <b>a signal of a possible exploit, before it ships</b> — with a
+      concrete counterexample. Type-checking, but for trust.
     </p>
+    <p class="lede lede-tech"><span class="ledetag">for builders</span> A commitment, an attestation, a state proof and an independent recomputation can each return <b>true</b> and still carry completely different authority. This is an executable type system for what one protocol's evidence is <b>allowed to mean</b> when another consumes it — so a composition can't silently upgrade what it proves.</p>
     <div class="pipe">
       <span class="p">semantic manifests</span><span class="ar">→</span>
       <span class="p">typed relation graph</span><span class="ar">→</span>
