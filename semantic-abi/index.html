@@ -167,6 +167,35 @@
   footer b{color:var(--muted);font-weight:500}
   footer a{color:var(--acc)}
   @media(prefers-reduced-motion:reduce){.spin{animation:none}}
+
+  /* --- sequenced reveal layer (presentation only; gated by .seq which JS adds) --- */
+  #leftcol{display:flex;flex-direction:column;gap:14px;min-width:0}
+  #rightcol{min-width:0}
+  .drivebar{text-align:center}
+  .drivebtn{display:inline-flex;align-items:center;gap:9px;background:transparent;color:var(--acc);border:1.5px solid var(--acc);border-radius:999px;padding:12px 26px;font:600 15px var(--f-disp);cursor:pointer;transition:.18s}
+  .drivebtn:hover{background:var(--acc);color:#fff;box-shadow:0 8px 22px -8px #2e63d980}
+  .replaybtn{margin-top:9px;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 16px;font:12px var(--f-mono);cursor:pointer}
+  .introcard{display:none;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 1px 2px #0f10170a;padding:16px 18px}
+  .introeyebrow{font-family:var(--f-mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--acc)}
+  .introh{font-family:var(--f-disp);font-size:15px;font-weight:600;margin:5px 0 6px}
+  .introdesc{font-size:13px;color:var(--muted);line-height:1.55;margin:0 0 14px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .step{border:1px solid var(--line2);border-radius:12px;padding:12px;background:#fafbff;display:flex;flex-direction:column}
+  .step.enf{background:var(--violbg);border-color:#b8730a22}
+  .stnum{font-family:var(--f-mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)}
+  .step.enf .stnum{color:var(--viol)}
+  .stt{font-family:var(--f-disp);font-size:13px;font-weight:600;margin:2px 0 9px}
+  .stic{height:44px;margin-bottom:9px;display:flex;align-items:center;justify-content:center}
+  .stic svg{width:100%;max-width:116px;height:44px}
+  .stcap{font-size:11px;color:var(--muted);line-height:1.45}
+  .stcap code{font-family:var(--f-mono);font-size:10px;color:var(--acc);background:var(--accsoft);padding:1px 4px;border-radius:4px}
+  @media(max-width:640px){.steps{grid-template-columns:1fr}}
+  .seqnarr{display:none;font-family:var(--f-mono);font-size:11.5px;color:var(--acc);margin:14px 0 0}
+  .wrap.seq .seqnarr{display:block}
+  .wrap.seq #runnerCard{opacity:0;transform:translateX(38px);transition:opacity .5s ease,transform .55s cubic-bezier(.2,.75,.25,1)}
+  .wrap.seq #runnerCard.in{opacity:1;transform:none}
+  .wrap.seq #linkerWrap{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease}
+  .wrap.seq #linkerWrap.in{opacity:1;transform:none}
 </style>
 
 <div class="ribbon">Interactive demo · ETHOnline 2026 · reference data, the runner is real: trustless-ai/semantic-abi (node runner/demo.mjs)</div>
@@ -204,7 +233,10 @@
     <p class="plugtext">Plug in with a small adapter, declare what your evidence may prove, and the zero-dependency runner checks the composition. No rip-and-replace, and every system that joins strengthens the standard. <b>It doesn't replace your stack. It becomes the spine between its parts.</b></p>
   </section>
 
+  <p class="seqnarr" id="seqnarr">Meet the agent, then drive it — the runner and the proof reveal in sequence.</p>
+
   <div class="grid">
+    <div id="leftcol">
 
     <!-- agent -->
     <div class="card">
@@ -222,13 +254,43 @@
         </div>
         <div class="chat">
           <div class="msgs" id="msgs"><div class="msg a">Drive me, every reply emits typed evidence: an <b>Evidence&lt;…&gt;</b> receipt the linker and the relation-runner can consume.</div></div>
-          <div class="composer"><input id="prompt" placeholder="ask the agent…" onkeydown="if(event.key==='Enter')runAction()"><button id="sendBtn" onclick="runAction()">Run <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-1px"><path d="M8 5v14l11-7z"/></svg></button></div>
+          <div class="composer"><input id="prompt" placeholder="ask the agent…" onkeydown="if(event.key==='Enter')driveAll()"><button id="sendBtn" onclick="driveAll()">Run <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-1px"><path d="M8 5v14l11-7z"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drivebar">
+      <button class="drivebtn" onclick="driveAll()">Drive the agent <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-1px"><path d="M8 5v14l11-7z"/></svg></button>
+      <div><button class="replaybtn" id="replaybtn" onclick="resetSeq()" hidden>↺ replay</button></div>
+    </div>
+    </div><!-- /leftcol -->
+
+    <div id="rightcol">
+    <div class="introcard" id="introCard">
+      <div class="introeyebrow">the agent driving this</div>
+      <h3 class="introh">Trustless Pioneer, securing its past and its future</h3>
+      <p class="introdesc">A pre-action runner: before it acts it commits what it is about to do, signs it with a post-quantum key, and anchors that record in time on-chain, so it can't be forged forward or backward. Drive it, and two independent systems check that record live.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="stnum">1 · publish</div><div class="stt">Declare the key</div>
+          <div class="stic"><svg viewBox="0 0 120 46" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="20" cy="23" r="12"/><circle cx="20" cy="23" r="3.4" fill="var(--acc)" stroke="none"/><path d="M32 23 H92 M78 23 V33 M92 23 V31"/></svg></div>
+          <div class="stcap">The agent's post-quantum key is published as <code>pq_pubkey</code>.</div>
+        </div>
+        <div class="step">
+          <div class="stnum">2 · anchor</div><div class="stt">Stamp it in time</div>
+          <div class="stic"><svg viewBox="0 0 120 46" fill="none" stroke="var(--acc)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="34" x2="112" y2="34" stroke="var(--peri)" stroke-width="2"/><line x1="34" y1="30" x2="34" y2="38"/><line x1="86" y1="30" x2="86" y2="38"/><circle cx="60" cy="9" r="4"/><path d="M60 13 V37"/><path d="M46 20 H74"/><path d="M42 26 c0 10 8 15 18 15 c10 0 18 -5 18 -15"/></svg></div>
+          <div class="stcap">Its hash is stamped on Ethereum. Hashes are quantum-safe, so the anchor is a provable, unforgeable time of existence.</div>
+        </div>
+        <div class="step enf">
+          <div class="stnum">3 · enforce</div><div class="stt">Draw a cutoff</div>
+          <div class="stic"><svg viewBox="0 0 120 46" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="30" x2="112" y2="30" stroke="var(--peri)" stroke-width="2"/><line x1="90" y1="8" x2="90" y2="42" stroke="var(--viol)" stroke-width="3.4"/><path d="M90 10 H80" stroke="var(--viol)" stroke-width="3.4"/><path d="M84 20 L58 30 M58 30 L67 25 M58 30 L67 34" stroke="var(--viol)" stroke-width="3"/></svg></div>
+          <div class="stcap">A strict cutoff <b>T</b> a retroactive forger cannot cross, no back-dating the record.</div>
         </div>
       </div>
     </div>
 
     <!-- surface -->
-    <div class="card">
+    <div class="card" id="runnerCard">
       <div class="h"><span class="t">Protected-relation runner · 2 levels, kept separate</span></div>
       <div class="subject">
         <span class="lab">Subject</span><span class="rid" id="subjId">Evidence&lt;…&gt; <b>, </b></span>
@@ -257,12 +319,13 @@
         <span>tampered input → expected VIOLATED; a correct backend observes VIOLATED and <b>conforms (PASS)</b>. FAIL = expected VIOLATED but observed PRESERVED, the distinction collapsed.</span>
       </div>
     </div>
+    </div><!-- /rightcol -->
   </div>
 
   <div class="detail" id="detail" hidden></div>
 
   <!-- semantic linker -->
-  <div class="linker">
+  <div class="linker" id="linkerWrap">
     <div class="h" style="padding:12px 16px;border-bottom:1px solid var(--line)"><span class="t" style="font-family:var(--f-mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint)">Can one system's proof be used by another? · checked live by the real runner</span></div>
     <div class="lk-body">
       <div class="lk-controls">
@@ -459,5 +522,35 @@ function link(){
 }
 function preset(p,c){ document.getElementById("prod").value=p; document.getElementById("cons").value=c; link(); }
 function esc(s){return s.replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]));}
-render(); preset("ONCHAIN_COMMITMENT","SEMANTIC_VERIFICATION");
+
+/* ---- sequenced reveal (presentation only; the functional DOM above is untouched) ---- */
+const seqReduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+function seqInit(){
+  if(seqReduce) return;                                   // reduced-motion: leave the full functional page visible
+  const w=document.querySelector(".wrap"); w.classList.add("seq");
+  const intro=document.getElementById("introCard"); if(intro) intro.style.display="block";
+  document.getElementById("runnerCard").style.display="none";
+  document.getElementById("linkerWrap").style.display="none";
+}
+function seqReveal(el,cls){ if(!el) return; el.style.display=""; void el.offsetWidth; el.classList.add(cls); }
+function driveAll(){
+  runAction();                                            // real: new receipt + matrix re-render
+  const w=document.querySelector(".wrap");
+  if(!w.classList.contains("seq") || w.classList.contains("driven")) return; // no-js/reduced or already revealed
+  w.classList.add("driven");
+  const intro=document.getElementById("introCard"); if(intro) intro.style.display="none";
+  seqReveal(document.getElementById("runnerCard"),"in");
+  setTimeout(()=>seqReveal(document.getElementById("linkerWrap"),"in"), 650);
+  const rb=document.getElementById("replaybtn"); if(rb) rb.hidden=false;
+}
+function resetSeq(){
+  const w=document.querySelector(".wrap"); w.classList.remove("driven");
+  const rc=document.getElementById("runnerCard"); rc.classList.remove("in"); rc.style.display="none";
+  const lw=document.getElementById("linkerWrap"); lw.classList.remove("in"); lw.style.display="none";
+  const intro=document.getElementById("introCard"); if(intro) intro.style.display="block";
+  document.getElementById("detail").hidden=true; sel=null;
+  const rb=document.getElementById("replaybtn"); if(rb) rb.hidden=true;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+render(); preset("ONCHAIN_COMMITMENT","SEMANTIC_VERIFICATION"); seqInit();
 </script>
