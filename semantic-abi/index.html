@@ -532,7 +532,8 @@ function render(){
       <div class="rel">protected relation:&nbsp; ${c.pair[0]} <span class="neq">≠</span> ${c.pair[1]}</div>
       <div>tampered input:&nbsp; <span class="old">${c.pair[1]}</span> → <span class="new">${c.pair[0]}</span> &nbsp;(distinction violated)</div>
       <div>Evidence digest:&nbsp; <span class="old">${before}</span> → <span class="new">${after}</span> &nbsp;(byte flip changes the hash)</div>
-      <div class="note">expected now <b>VIOLATED</b>. A conforming backend observes VIOLATED and flags it, <span class="ok">PASS · caught</span>. A backend that collapsed the distinction would still report PRESERVED, <b>FAIL</b>.</div>`;
+      <div class="note">expected now <b>VIOLATED</b>. A conforming backend observes VIOLATED and flags it, <span class="ok">PASS · caught</span>. A backend that collapsed the distinction would still report PRESERVED, <b>FAIL</b>.</div>
+      <div class="note">so the pills below read: observed-pair <b style="color:var(--viol)">${tally.violated} VIOLATED</b>, conformance <b class="ok">${tally.pass} PASS</b>. Conformance PASS means the check <b>worked</b> (it caught the tamper), not that the evidence is clean, which is why it stays green.</div>`;
   } else { tv.hidden=true; }
   if(sel) renderDetail();
 }
